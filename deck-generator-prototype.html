@@ -887,7 +887,7 @@
                 <img id="reference-image-preview" alt="範例圖片預覽" />
               </div>
             </div>
-            <button class="button secondary">產生無文字配圖風格</button>
+            <button class="button secondary" id="generate-image-style" type="button">產生無文字配圖風格</button>
           </div>
         </section>
 
@@ -966,7 +966,11 @@
       const slideTitle = document.getElementById("slide-title");
       const slideLead = document.getElementById("slide-lead");
       const generateOutline = document.getElementById("generate-outline");
+      const generateImageStyle = document.getElementById("generate-image-style");
       const articleInput = document.querySelector("textarea");
+      const audienceInput = document.querySelectorAll("select")[0];
+      const pageCountInput = document.querySelectorAll("select")[1];
+      const imagePurposeInput = document.querySelectorAll("select")[2];
       const referenceInput = document.getElementById("reference-image");
       const referencePreview = document.getElementById("reference-preview");
       const referenceImagePreview = document.getElementById("reference-image-preview");
@@ -979,10 +983,13 @@
         document.getElementById("caption-3"),
         document.getElementById("caption-4")
       ];
+      let currentDesign = "editorial";
+      let hasReferenceImage = false;
 
       function applyDesign(key) {
         const data = previews[key];
         if (!data) return;
+        currentDesign = key;
         cards.forEach((card) => {
           const selected = card.dataset.design === key;
           card.classList.toggle("active", selected);
@@ -1010,25 +1017,77 @@
         });
       });
 
-      generateOutline.addEventListener("click", () => {
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`API failed: ${response.status}`);
+        return response.json();
+      }
+
+      generateOutline.addEventListener("click", async () => {
         const rawText = articleInput.value.trim();
-        const summary = rawText.length > 42 ? `${rawText.slice(0, 42)}...` : rawText;
-        previewTitle.textContent = "已生成：第一頁草稿預覽";
-        previewDesc.textContent = "這裡示範模型整理後的結果：先產生可簡報的主張，再交給目前選定的設計方向套版。";
-        slideKicker.textContent = "AI 文字整理｜第一頁";
-        slideTitle.textContent = rawText ? "把長文整理成一個清楚的開場主張" : "請貼上文章，生成第一頁主張";
-        slideLead.textContent = rawText
-          ? `來源重點：${summary}。系統會把原文改寫成每頁主張、講述順序與 OpenSlide 可排版文字。`
-          : "貼上文章後，Gemini、Claude、OpenAI 會交叉整理內容，再生成適合簡報的頁面文字。";
-        captions[0].textContent = "原文";
-        captions[1].textContent = "主張";
-        captions[2].textContent = "版型";
-        captions[3].textContent = "預覽";
+        generateOutline.textContent = "三模型整理中...";
+        generateOutline.disabled = true;
+        try {
+          const data = await postJson("/api/generate-outline", {
+            article: rawText,
+            audience: audienceInput.value,
+            pageCount: pageCountInput.value,
+            design: currentDesign
+          });
+          previewTitle.textContent = data.ok ? "已生成：三模型整理結果" : "API key 尚未完整填入";
+          previewDesc.textContent = data.ok
+            ? "Gemini、Claude、OpenAI 已透過後端 API 交叉整理，前端只接收整理後結果。"
+            : `請先設定：${data.missingKeys.join("、")}`;
+          slideKicker.textContent = data.ok ? "AI 文字整理｜三模型" : "API 設定｜尚未完成";
+          slideTitle.textContent = data.outline.title;
+          slideLead.textContent = data.outline.lead;
+          data.outline.captions.forEach((text, index) => {
+            captions[index].textContent = text;
+          });
+        } catch (error) {
+          previewTitle.textContent = "後端 API 尚未啟動";
+          previewDesc.textContent = "本機請用 npm run dev:app；線上請部署到支援 serverless functions 的平台並設定 secrets。";
+          slideKicker.textContent = "API 連線｜失敗";
+          slideTitle.textContent = "目前只有靜態前端，還不能呼叫三個 AI";
+          slideLead.textContent = error.message;
+        } finally {
+          generateOutline.textContent = "生成簡報大綱";
+          generateOutline.disabled = false;
+        }
+      });
+
+      generateImageStyle.addEventListener("click", async () => {
+        generateImageStyle.textContent = "產生風格中...";
+        generateImageStyle.disabled = true;
+        try {
+          const data = await postJson("/api/suggest-image-style", {
+            purpose: imagePurposeInput.value,
+            design: currentDesign,
+            hasReferenceImage
+          });
+          referenceChip.classList.add("active");
+          referenceChip.textContent = data.ok ? "已取得無文字配圖風格" : "缺少 Gemini / OpenAI key";
+          previewDesc.textContent = data.ok
+            ? data.stylePrompt.slice(0, 120)
+            : `請先設定：${data.missingKeys.join("、")}`;
+        } catch (error) {
+          referenceChip.classList.add("active");
+          referenceChip.textContent = "配圖 API 尚未啟動";
+          previewDesc.textContent = "本機請用 npm run dev:app；線上請部署 serverless API 並設定 secrets。";
+        } finally {
+          generateImageStyle.textContent = "產生無文字配圖風格";
+          generateImageStyle.disabled = false;
+        }
       });
 
       referenceInput.addEventListener("change", () => {
         const file = referenceInput.files && referenceInput.files[0];
         if (!file) return;
+        hasReferenceImage = true;
         const url = URL.createObjectURL(file);
         referenceImagePreview.src = url;
         referencePreview.classList.add("active");

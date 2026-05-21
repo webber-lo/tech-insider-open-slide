@@ -4,17 +4,24 @@ TECH INSIDER OpenSlide / SDD workspace for AI-operable presentation authoring.
 
 ## Deck Generator Prototype
 
-Open the prototype directly:
+Local full app with API proxy:
+
+```bash
+npm run dev:app
+```
+
+Open:
 
 ```txt
-deck-generator-prototype.html
+http://127.0.0.1:8787/
 ```
 
 It currently supports:
 
 - choosing a design direction and updating the right-side `Artifact Preview`
-- generating a first-page preview from pasted article text
-- uploading a reference image for no-text illustration style guidance
+- calling `/api/generate-outline` to coordinate Gemini, Claude, and OpenAI
+- calling `/api/suggest-image-style` for no-text illustration style guidance
+- uploading a reference image for visual direction
 
 ## API Keys
 
@@ -25,6 +32,16 @@ C:\Users\webbe\.tech-insider-sdd\.env
 ```
 
 Use `.env.example` only as a variable-name reference. Do not commit real keys.
+
+Fill the local file:
+
+```env
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+```
+
+GitHub Pages is preview-only because it cannot safely store private API keys. Deploy the app to Vercel or another serverless platform and set the same variables as deployment secrets for the AI calls to work online.
 
 Slides as React components. Each slide lives under `slides/<id>/index.tsx` and default-exports an array of page components. The `@open-slide/core` runtime handles layout, scaling, navigation, thumbnails, and fullscreen play mode — you just write the pages.
 

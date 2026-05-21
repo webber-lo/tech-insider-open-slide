@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "open-slide dev",
+    "dev:app": "node tools/local-server.mjs",
     "build": "open-slide build",
     "preview": "open-slide preview",
     "sync:skills": "open-slide sync:skills"
