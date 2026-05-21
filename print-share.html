@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>TECH INSIDER Channel Plan Share</title>
+    <style>
+      @page {
+        size: 1920px 1080px;
+        margin: 0;
+      }
+
+      html,
+      body,
+      #root {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+      }
+
+      .print-frame {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        break-after: page;
+        page-break-after: always;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .print-frame:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React, { createElement } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import slide from './slides/tech-insider-channel-plan-share/index.tsx';
+      import * as slideModule from './slides/tech-insider-channel-plan-share/index.tsx';
+
+      const root = document.getElementById('root');
+      const design = slideModule.design;
+      const cssVars = design
+        ? {
+            '--osd-bg': design.palette.bg,
+            '--osd-text': design.palette.text,
+            '--osd-accent': design.palette.accent,
+            '--osd-font-display': design.fonts.display,
+            '--osd-font-body': design.fonts.body,
+            '--osd-size-hero': `${design.typeScale.hero}px`,
+            '--osd-size-body': `${design.typeScale.body}px`,
+            '--osd-radius': `${design.radius}px`,
+          }
+        : {};
+
+      const pages = slide.map((Page, index) =>
+        createElement(
+          'div',
+          {
+            key: index,
+            className: 'print-frame',
+            style: cssVars,
+            'data-page': index + 1,
+          },
+          createElement(Page),
+        ),
+      );
+
+      createRoot(root).render(createElement(React.Fragment, null, pages));
+      await document.fonts.ready;
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      window.__READY = true;
+    </script>
+  </body>
+</html>

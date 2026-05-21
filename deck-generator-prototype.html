@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deck Generator Console</title>
+    <style>
+      :root {
+        --ink: #102a3a;
+        --muted: #607684;
+        --navy: #0f2854;
+        --royal: #1c4d8d;
+        --blue: #4988c4;
+        --pale: #bde8f5;
+        --paper: #f7f8f0;
+        --cream: #fbfaf4;
+        --line: #cfe0ea;
+        --white: #ffffff;
+        --amber: #c98b42;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: "Noto Sans TC", "Microsoft JhengHei", Inter, system-ui, sans-serif;
+        background:
+          radial-gradient(circle at 76% 20%, rgba(189, 232, 245, 0.65), transparent 30%),
+          linear-gradient(135deg, #f7f8f0 0%, #edf4f7 52%, #f9f5eb 100%);
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: 72px auto 1fr;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        border-bottom: 1px solid rgba(207, 224, 234, 0.9);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(18px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 900;
+        color: var(--navy);
+      }
+
+      .seal {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--navy);
+        color: var(--white);
+        display: grid;
+        place-items: center;
+        letter-spacing: 0;
+        font-size: 13px;
+      }
+
+      .status {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--blue);
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 340px 360px minmax(620px, 1fr);
+        gap: 18px;
+        padding: 18px 22px 22px;
+      }
+
+      .intent-strip {
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr;
+        gap: 18px;
+        align-items: stretch;
+        padding: 18px 22px 0;
+      }
+
+      .intent-title {
+        min-height: 88px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 14px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(189, 232, 245, 0.36)),
+          var(--white);
+        padding: 18px 20px;
+        box-shadow: 0 18px 54px rgba(16, 42, 58, 0.07);
+      }
+
+      .intent-title strong {
+        display: block;
+        color: var(--navy);
+        font-size: 18px;
+        line-height: 1.25;
+        margin-top: 7px;
+      }
+
+      .intent-title span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .panel {
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 24px 80px rgba(16, 42, 58, 0.08);
+        overflow: hidden;
+      }
+
+      .panel.dark {
+        color: var(--white);
+        background:
+          linear-gradient(160deg, rgba(15, 40, 84, 0.98), rgba(28, 77, 141, 0.92)),
+          var(--navy);
+      }
+
+      .panel-head {
+        padding: 22px 22px 16px;
+        border-bottom: 1px solid rgba(207, 224, 234, 0.8);
+      }
+
+      .dark .panel-head {
+        border-bottom-color: rgba(255, 255, 255, 0.18);
+      }
+
+      .eyebrow {
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: 10px;
+      }
+
+      .dark .eyebrow {
+        color: var(--pale);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 25px;
+        line-height: 1.24;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .desc {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .dark .desc {
+        color: rgba(255, 255, 255, 0.76);
+      }
+
+      .panel-body {
+        padding: 20px 22px 22px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 900;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      .dark label {
+        color: rgba(255, 255, 255, 0.76);
+      }
+
+      textarea,
+      select,
+      input {
+        width: 100%;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--ink);
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 252px;
+        padding: 14px;
+        resize: vertical;
+        line-height: 1.65;
+      }
+
+      select,
+      input {
+        height: 42px;
+        padding: 0 12px;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .button {
+        height: 48px;
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        background: var(--amber);
+        color: var(--white);
+        font-weight: 900;
+        letter-spacing: 0;
+        cursor: default;
+      }
+
+      .button.secondary {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+      }
+
+      .model-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .model-chip {
+        border: 1px solid rgba(189, 232, 245, 0.3);
+        border-radius: 999px;
+        padding: 7px 10px;
+        color: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.09);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .helper-note {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .upload-zone {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 12px;
+        align-items: center;
+        margin-top: 12px;
+        padding: 14px;
+        border: 1px dashed rgba(73, 136, 196, 0.55);
+        border-radius: 12px;
+        background:
+          linear-gradient(135deg, rgba(247, 248, 240, 0.92), rgba(189, 232, 245, 0.28)),
+          rgba(255, 255, 255, 0.78);
+        cursor: pointer;
+      }
+
+      .upload-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: var(--royal);
+        background: rgba(189, 232, 245, 0.46);
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .upload-title {
+        color: var(--navy);
+        font-size: 13px;
+        font-weight: 900;
+        margin-bottom: 3px;
+      }
+
+      .upload-text {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .upload-input {
+        display: none;
+      }
+
+      .reference-preview {
+        display: none;
+        margin-top: 10px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        background: var(--cream);
+      }
+
+      .reference-preview img {
+        display: block;
+        width: 100%;
+        height: 96px;
+        object-fit: cover;
+      }
+
+      .reference-preview.active {
+        display: block;
+      }
+
+      .choice {
+        display: grid;
+        gap: 10px;
+      }
+
+      .choice-card {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.82);
+        cursor: pointer;
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      .choice-card.active {
+        border-color: rgba(73, 136, 196, 0.9);
+        background: #eef8fb;
+      }
+
+      .choice-card:hover,
+      .choice-card:focus-visible {
+        transform: translateY(-1px);
+        border-color: rgba(73, 136, 196, 0.72);
+        outline: none;
+      }
+
+      .icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        color: var(--white);
+        background: var(--royal);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .choice-title {
+        font-size: 14px;
+        font-weight: 900;
+        margin-bottom: 4px;
+      }
+
+      .choice-text {
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+
+      .mini-plan {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        margin: 0;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 14px;
+        overflow: hidden;
+        background: rgba(207, 224, 234, 0.9);
+        box-shadow: 0 18px 54px rgba(16, 42, 58, 0.07);
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 16px 18px;
+        border-top: 0;
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .num {
+        font-weight: 900;
+        color: var(--blue);
+        letter-spacing: 0.04em;
+      }
+
+      .step strong {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .step span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .preview {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-width: 0;
+      }
+
+      .preview-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .slide {
+        position: relative;
+        width: min(100%, 980px);
+        aspect-ratio: 16 / 9;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 16px;
+        background: var(--cream);
+        border: 1px solid rgba(207, 224, 234, 0.9);
+        box-shadow: 0 32px 80px rgba(16, 42, 58, 0.18);
+      }
+
+      .slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.96) 38%, rgba(251, 250, 244, 0.18) 62%, rgba(251, 250, 244, 0) 100%),
+          radial-gradient(circle at 78% 38%, rgba(189, 232, 245, 0.7), transparent 34%);
+        z-index: 1;
+      }
+
+      .slide.utility {
+        background: #f8fbfd;
+      }
+
+      .slide.utility::before {
+        background:
+          linear-gradient(90deg, rgba(15, 40, 84, 0.96) 0%, rgba(15, 40, 84, 0.92) 34%, rgba(247, 248, 240, 0.18) 34%, rgba(247, 248, 240, 0) 100%),
+          radial-gradient(circle at 72% 34%, rgba(189, 232, 245, 0.75), transparent 34%);
+      }
+
+      .slide.utility .slide-kicker,
+      .slide.utility .slide-title {
+        color: var(--white);
+      }
+
+      .slide.utility .hairline {
+        background: rgba(255, 255, 255, 0.45);
+      }
+
+      .slide.utility .slide-lead {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .slide.magazine {
+        background:
+          linear-gradient(135deg, #0f2854 0%, #1c4d8d 55%, #102a3a 100%);
+      }
+
+      .slide.magazine::before {
+        background:
+          linear-gradient(90deg, rgba(15, 40, 84, 0.2), rgba(15, 40, 84, 0.85)),
+          radial-gradient(circle at 24% 38%, rgba(189, 232, 245, 0.35), transparent 30%);
+      }
+
+      .slide.magazine .slide-copy {
+        width: 56%;
+      }
+
+      .slide.magazine .slide-kicker,
+      .slide.magazine .slide-title,
+      .slide.magazine .slide-lead {
+        color: var(--white);
+      }
+
+      .slide.magazine .hairline {
+        background: rgba(189, 232, 245, 0.55);
+      }
+
+      .slide.magazine .caption {
+        background: rgba(255, 255, 255, 0.13);
+        color: var(--white);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .slide-copy {
+        position: absolute;
+        z-index: 3;
+        left: 5%;
+        top: 7%;
+        width: 47%;
+      }
+
+      .slide-kicker {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        font-weight: 900;
+        color: var(--navy);
+        margin-bottom: 54px;
+      }
+
+      .slide-kicker::before {
+        content: "";
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--navy);
+      }
+
+      .slide-title {
+        font-size: clamp(28px, 3.2vw, 48px);
+        line-height: 1.17;
+        font-weight: 900;
+        color: var(--navy);
+        margin-bottom: 22px;
+      }
+
+      .hairline {
+        height: 2px;
+        width: 92%;
+        background: var(--line);
+        margin-bottom: 20px;
+      }
+
+      .slide-lead {
+        font-size: clamp(13px, 1.12vw, 17px);
+        line-height: 1.75;
+        color: var(--slate);
+        max-width: 88%;
+      }
+
+      .visual {
+        position: absolute;
+        z-index: 2;
+        right: 4%;
+        top: 12%;
+        width: 50%;
+        height: 60%;
+      }
+
+      .building {
+        position: absolute;
+        right: 0;
+        top: 8%;
+        width: 34%;
+        height: 56%;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 2px solid rgba(73, 136, 196, 0.25);
+      }
+
+      .building::before {
+        content: "";
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        top: -18%;
+        height: 22%;
+        border-radius: 10px 10px 4px 4px;
+        background: var(--blue);
+      }
+
+      .people {
+        position: absolute;
+        left: 10%;
+        bottom: 12%;
+        width: 34%;
+        height: 46%;
+        border-radius: 999px 999px 16px 16px;
+        background: rgba(73, 136, 196, 0.9);
+      }
+
+      .people::before,
+      .people::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: #f1c7a5;
+      }
+
+      .people::before {
+        width: 38%;
+        aspect-ratio: 1;
+        left: 10%;
+        top: -22%;
+      }
+
+      .people::after {
+        width: 34%;
+        aspect-ratio: 1;
+        right: 12%;
+        top: -18%;
+      }
+
+      .arrow {
+        position: absolute;
+        left: 42%;
+        top: 45%;
+        width: 26%;
+        height: 12px;
+        border-radius: 999px;
+        background: var(--blue);
+      }
+
+      .arrow::after {
+        content: "";
+        position: absolute;
+        right: -18px;
+        top: -10px;
+        border-left: 20px solid var(--blue);
+        border-top: 16px solid transparent;
+        border-bottom: 16px solid transparent;
+      }
+
+      .question {
+        position: absolute;
+        left: 54%;
+        top: 17%;
+        font-size: clamp(68px, 8vw, 118px);
+        font-weight: 900;
+        color: var(--navy);
+      }
+
+      .caption-row {
+        position: absolute;
+        z-index: 3;
+        left: 5%;
+        right: 5%;
+        bottom: 7%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .caption {
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--royal);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .reference-chip {
+        position: absolute;
+        z-index: 4;
+        right: 5%;
+        top: 6%;
+        display: none;
+        padding: 8px 11px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        color: var(--royal);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .reference-chip.active {
+        display: block;
+      }
+
+      .footer {
+        position: absolute;
+        z-index: 3;
+        right: 5%;
+        bottom: 2.6%;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 1200px) {
+        .intent-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .mini-plan {
+          grid-template-columns: 1fr;
+        }
+
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .slide {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="seal">TI</div>
+          <div>Deck Generator Console</div>
+        </div>
+        <div class="status"><span class="dot"></span>SDD driven · OpenSlide preview · Image slots</div>
+      </header>
+
+      <section class="intent-strip" aria-label="product intent">
+        <div class="intent-title">
+          <span>Product intent</span>
+          <strong>先讓使用者理解：這不是 PPT 軟體，而是 AI 到 OpenSlide 的中介工作台。</strong>
+        </div>
+        <div class="mini-plan">
+          <div class="step"><div class="num">01</div><div><strong>多模型整理文字</strong><span>Gemini、Claude、OpenAI 交叉整理主張與順序。</span></div></div>
+          <div class="step"><div class="num">02</div><div><strong>Open Design 建議版型</strong><span>依內容選封面、矩陣、比較、時間軸或敘事頁。</span></div></div>
+          <div class="step"><div class="num">03</div><div><strong>無文字配圖建議</strong><span>Gemini 與 OpenAI 提風格，圖片不得出現任何文字。</span></div></div>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <section class="panel dark">
+          <div class="panel-head">
+            <div class="eyebrow">Brief</div>
+            <h1>把長文變成可以簡報的敘事</h1>
+            <p class="desc">貼文章、採訪稿或會議紀錄；Gemini、Claude、OpenAI 先交叉整理篇章，不碰版面像素。</p>
+          </div>
+          <div class="panel-body">
+            <div class="field">
+              <label>文章或資料</label>
+              <textarea>貼上一大篇文章。系統會請 Gemini、Claude、OpenAI 交叉討論，整理成：每頁主張、重點、講述順序、建議版型，以及哪些頁需要主視覺。</textarea>
+            </div>
+            <div class="model-stack">
+              <span class="model-chip">Gemini 分析資料脈絡</span>
+              <span class="model-chip">Claude 整理敘事結構</span>
+              <span class="model-chip">OpenAI 收斂簡報文字</span>
+            </div>
+            <div class="two field">
+              <div>
+                <label>受眾</label>
+                <select><option>內部企劃</option><option>高階主管</option><option>合作夥伴</option></select>
+              </div>
+              <div>
+                <label>頁數</label>
+                <select><option>6-8 頁</option><option>10-12 頁</option><option>3 頁摘要</option></select>
+              </div>
+            </div>
+            <button class="button" id="generate-outline" type="button">生成簡報大綱</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div class="eyebrow">Direction</div>
+            <h2>由 Open Design 建議版型</h2>
+            <p class="desc">使用者不用先懂版型；系統依內容目的，從 Open Design 的方向與 layout catalog 推薦。</p>
+          </div>
+          <div class="panel-body">
+            <div class="field">
+              <label>設計方向</label>
+              <div class="choice">
+                <div class="choice-card active" data-design="editorial" role="button" tabindex="0" aria-pressed="true">
+                  <div class="icon">01</div>
+                  <div><div class="choice-title">Editorial Explainer</div><div class="choice-text">適合政策、科技新聞、議題拆解；文字與插畫融合。</div></div>
+                </div>
+                <div class="choice-card" data-design="utility" role="button" tabindex="0" aria-pressed="false">
+                  <div class="icon">02</div>
+                  <div><div class="choice-title">Tech Utility</div><div class="choice-text">適合策略簡報、商業科技頻道企劃與工作流。</div></div>
+                </div>
+                <div class="choice-card" data-design="magazine" role="button" tabindex="0" aria-pressed="false">
+                  <div class="icon">03</div>
+                  <div><div class="choice-title">Magazine Narrative</div><div class="choice-text">適合更像雜誌封面與專題報導的視覺敘事。</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>這張無文字配圖要幫簡報做什麼？</label>
+              <select><option>讓抽象議題變好懂</option><option>當封面第一眼主視覺</option><option>補充證據或案例畫面</option><option>建立頁面氣氛與情境</option></select>
+              <div class="helper-note">Gemini 與 OpenAI 只提出風格、構圖與情境建議；配圖不得含任何文字，中文字、頁碼、標籤仍交給 OpenSlide。</div>
+              <label class="upload-zone" for="reference-image">
+                <div class="upload-mark">+</div>
+                <div>
+                  <div class="upload-title" id="upload-title">上傳範例圖片</div>
+                  <div class="upload-text" id="upload-text">提供喜歡的風格、構圖或氣氛參考；系統只學習視覺方向，不讀取圖片裡的文字。</div>
+                </div>
+              </label>
+              <input class="upload-input" id="reference-image" type="file" accept="image/*" />
+              <div class="reference-preview" id="reference-preview">
+                <img id="reference-image-preview" alt="範例圖片預覽" />
+              </div>
+            </div>
+            <button class="button secondary">產生無文字配圖風格</button>
+          </div>
+        </section>
+
+        <section class="preview">
+          <div class="preview-head">
+            <div>
+              <div class="eyebrow">Artifact Preview</div>
+              <h2 id="preview-title">目前套用：Editorial Explainer</h2>
+              <p class="desc" id="preview-desc">選擇左側設計方向後，這裡即時切換完整 slide 預覽；配圖無文字，文字由 OpenSlide 排版。</p>
+            </div>
+          </div>
+
+          <div class="slide" id="artifact-slide">
+            <div class="slide-copy">
+              <div class="slide-kicker" id="slide-kicker">政經局勢｜議題整理</div>
+              <div class="slide-title" id="slide-title">當制度改變時，誰需要重新理解規則？</div>
+              <div class="hairline"></div>
+              <p class="slide-lead" id="slide-lead">模型先整理長文，產出每頁主張；圖片模型只生成右側場景。最後由 OpenSlide 把文字、標籤、頁碼與主視覺融合成同一頁。</p>
+            </div>
+
+            <div class="visual">
+              <div class="building"></div>
+              <div class="people"></div>
+              <div class="arrow"></div>
+              <div class="question">?</div>
+            </div>
+
+            <div class="caption-row">
+              <div class="caption" id="caption-1">文字整理</div>
+              <div class="caption" id="caption-2">主視覺生成</div>
+              <div class="caption" id="caption-3">SDD 套版</div>
+              <div class="caption" id="caption-4">匯出分享</div>
+            </div>
+            <div class="reference-chip" id="reference-chip">已加入範例圖風格參考</div>
+            <div class="footer">Slide 1｜封面</div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <script>
+      const previews = {
+        editorial: {
+          title: "目前套用：Editorial Explainer",
+          desc: "適合把政策、科技新聞或複雜議題拆成容易理解的敘事頁；配圖無文字，文字由 OpenSlide 排版。",
+          kicker: "政經局勢｜議題整理",
+          slideTitle: "當制度改變時，誰需要重新理解規則？",
+          lead: "模型先整理長文，產出每頁主張；圖片模型只生成右側場景。最後由 OpenSlide 把文字、標籤、頁碼與主視覺融合成同一頁。",
+          captions: ["文字整理", "主視覺生成", "SDD 套版", "匯出分享"],
+          className: ""
+        },
+        utility: {
+          title: "目前套用：Tech Utility",
+          desc: "適合策略簡報與工作流說明，畫面更像操作台：左側定義判斷，右側呈現系統產出。",
+          kicker: "AI 工作流｜策略提案",
+          slideTitle: "把文章變成簡報，需要哪幾個可控步驟？",
+          lead: "三個模型先整理內容分工，Open Design 負責版型建議，OpenSlide 最後接手排版、頁碼、標籤與輸出。",
+          captions: ["資料輸入", "模型交叉", "版型建議", "簡報輸出"],
+          className: "utility"
+        },
+        magazine: {
+          title: "目前套用：Magazine Narrative",
+          desc: "適合專題感較強的提案或封面頁，保留更大的情緒張力與主視覺空間。",
+          kicker: "TECH INSIDER｜專題敘事",
+          slideTitle: "科技內容要先被看見，才有機會被理解",
+          lead: "主視覺負責建立情境與節奏，但不承擔任何文字；標題、摘要與資訊層級仍由 OpenSlide 精準控制。",
+          captions: ["主張", "情境", "版面", "沉澱"],
+          className: "magazine"
+        }
+      };
+
+      const cards = document.querySelectorAll(".choice-card[data-design]");
+      const slide = document.getElementById("artifact-slide");
+      const previewTitle = document.getElementById("preview-title");
+      const previewDesc = document.getElementById("preview-desc");
+      const slideKicker = document.getElementById("slide-kicker");
+      const slideTitle = document.getElementById("slide-title");
+      const slideLead = document.getElementById("slide-lead");
+      const generateOutline = document.getElementById("generate-outline");
+      const articleInput = document.querySelector("textarea");
+      const referenceInput = document.getElementById("reference-image");
+      const referencePreview = document.getElementById("reference-preview");
+      const referenceImagePreview = document.getElementById("reference-image-preview");
+      const referenceChip = document.getElementById("reference-chip");
+      const uploadTitle = document.getElementById("upload-title");
+      const uploadText = document.getElementById("upload-text");
+      const captions = [
+        document.getElementById("caption-1"),
+        document.getElementById("caption-2"),
+        document.getElementById("caption-3"),
+        document.getElementById("caption-4")
+      ];
+
+      function applyDesign(key) {
+        const data = previews[key];
+        if (!data) return;
+        cards.forEach((card) => {
+          const selected = card.dataset.design === key;
+          card.classList.toggle("active", selected);
+          card.setAttribute("aria-pressed", selected ? "true" : "false");
+        });
+        slide.classList.remove("utility", "magazine");
+        if (data.className) slide.classList.add(data.className);
+        previewTitle.textContent = data.title;
+        previewDesc.textContent = data.desc;
+        slideKicker.textContent = data.kicker;
+        slideTitle.textContent = data.slideTitle;
+        slideLead.textContent = data.lead;
+        captions.forEach((caption, index) => {
+          caption.textContent = data.captions[index];
+        });
+      }
+
+      cards.forEach((card) => {
+        card.addEventListener("click", () => applyDesign(card.dataset.design));
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            applyDesign(card.dataset.design);
+          }
+        });
+      });
+
+      generateOutline.addEventListener("click", () => {
+        const rawText = articleInput.value.trim();
+        const summary = rawText.length > 42 ? `${rawText.slice(0, 42)}...` : rawText;
+        previewTitle.textContent = "已生成：第一頁草稿預覽";
+        previewDesc.textContent = "這裡示範模型整理後的結果：先產生可簡報的主張，再交給目前選定的設計方向套版。";
+        slideKicker.textContent = "AI 文字整理｜第一頁";
+        slideTitle.textContent = rawText ? "把長文整理成一個清楚的開場主張" : "請貼上文章，生成第一頁主張";
+        slideLead.textContent = rawText
+          ? `來源重點：${summary}。系統會把原文改寫成每頁主張、講述順序與 OpenSlide 可排版文字。`
+          : "貼上文章後，Gemini、Claude、OpenAI 會交叉整理內容，再生成適合簡報的頁面文字。";
+        captions[0].textContent = "原文";
+        captions[1].textContent = "主張";
+        captions[2].textContent = "版型";
+        captions[3].textContent = "預覽";
+      });
+
+      referenceInput.addEventListener("change", () => {
+        const file = referenceInput.files && referenceInput.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        referenceImagePreview.src = url;
+        referencePreview.classList.add("active");
+        referenceChip.classList.add("active");
+        uploadTitle.textContent = file.name;
+        uploadText.textContent = "已加入風格參考；系統只學習畫面氣氛與構圖，不使用圖片中的文字。";
+      });
+    </script>
+  </body>
+</html>
