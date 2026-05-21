@@ -100,6 +100,44 @@
         padding: 18px 22px 0;
       }
 
+      .api-strip {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+        align-items: center;
+        margin: 14px 22px 0;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(201, 139, 66, 0.35);
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 240, 0.78)),
+          var(--white);
+        box-shadow: 0 18px 54px rgba(16, 42, 58, 0.06);
+      }
+
+      .api-strip strong {
+        color: var(--navy);
+        font-size: 14px;
+      }
+
+      .api-strip span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .api-path {
+        padding: 8px 10px;
+        border-radius: 8px;
+        color: var(--navy);
+        background: rgba(189, 232, 245, 0.42);
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
       .intent-title {
         min-height: 88px;
         border: 1px solid rgba(207, 224, 234, 0.95);
@@ -725,6 +763,14 @@
           grid-template-columns: 1fr;
         }
 
+        .api-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .api-path {
+          white-space: normal;
+        }
+
         .mini-plan {
           grid-template-columns: 1fr;
         }
@@ -759,6 +805,14 @@
           <div class="step"><div class="num">02</div><div><strong>Open Design 建議版型</strong><span>依內容選封面、矩陣、比較、時間軸或敘事頁。</span></div></div>
           <div class="step"><div class="num">03</div><div><strong>無文字配圖建議</strong><span>Gemini 與 OpenAI 提風格，圖片不得出現任何文字。</span></div></div>
         </div>
+      </section>
+
+      <section class="api-strip" aria-label="api key setup">
+        <div>
+          <strong>API 尚未填入：三個平台的 key 要放在安全區，不要寫進 GitHub 前端。</strong>
+          <span>本機版會讀這個外部檔案；GitHub Pages 是靜態頁，正式串 Gemini / Claude / OpenAI 時要改走後端 secrets。</span>
+        </div>
+        <div class="api-path">C:\Users\webbe\.tech-insider-sdd\.env</div>
       </section>
 
       <div class="workspace">
