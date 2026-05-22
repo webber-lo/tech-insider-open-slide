@@ -5,3 +5,5 @@ exports/
 .env.*
 !.env.example
 *.local
+
+.vercel

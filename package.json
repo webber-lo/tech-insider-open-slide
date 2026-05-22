@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "open-slide dev",
     "dev:app": "node tools/local-server.mjs",
-    "build": "open-slide build",
+    "build": "open-slide build && node tools/prepare-app-build.mjs",
     "preview": "open-slide preview",
     "sync:skills": "open-slide sync:skills"
   },
