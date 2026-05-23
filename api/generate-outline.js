@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { ok: false, error: "Use POST" });
 
   const { article = "", audience = "", pageCount = "", design = "" } = await readJsonBody(req);
-  const targetPages = parsePageTarget(pageCount);
+  const targetPages = parsePageTarget(pageCount, article);
   const prompt = [
     "你是 TECH INSIDER 的簡報內容規劃顧問。",
     "請把使用者提供的長文整理成適合簡報的逐頁內容。",
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     "請只輸出 JSON，格式為 {\"pages\":[...]}，不要輸出 Markdown 或 HTML。",
     "不要產生圖片提示詞，不要產生 HTML。",
     `對象：${audience}`,
-    `頁數：${pageCount}`,
+    `頁數控制：${pageCount || "依文章指定"}，實際目標：${targetPages} 頁`,
     `設計方向只作為語氣參考，不要輸出版型：${design}`,
     `文章：${article}`
   ].join("\n\n");
@@ -45,10 +45,21 @@ export default async function handler(req, res) {
   });
 }
 
-function parsePageTarget(pageCount) {
-  const numbers = String(pageCount || "").match(/\d+/g)?.map(Number).filter(Boolean) || [];
-  if (!numbers.length) return 8;
-  return Math.max(1, Math.min(24, Math.max(...numbers)));
+function parsePageTarget(pageCount, article) {
+  const selected = String(pageCount || "").trim();
+  if (selected && selected !== "auto" && !selected.includes("依文章")) {
+    const selectedNumber = selected.match(/\d+/)?.[0];
+    if (selectedNumber) return clampPageCount(Number(selectedNumber));
+  }
+
+  const articleNumber = String(article || "").match(/(?:做成|整理成|產出|生成|規劃成|製作成|共|總共)?\s*(\d{1,2})\s*(?:頁|p|P|slides?|Slides?)/)?.[1];
+  if (articleNumber) return clampPageCount(Number(articleNumber));
+
+  return 8;
+}
+
+function clampPageCount(value) {
+  return Math.max(1, Math.min(24, value));
 }
 
 function fitPageCount(pages, target) {
