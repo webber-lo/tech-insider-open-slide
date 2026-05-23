@@ -91,11 +91,59 @@ export async function callGemini(prompt) {
 export function fallbackOutline(article) {
   const compact = article.replace(/\s+/g, " ").trim();
   const summary = compact.length > 80 ? `${compact.slice(0, 80)}...` : compact;
+  const seed = compact || "請貼上文章，生成簡報內容。";
+  const pages = [
+    {
+      page: 1,
+      layout: "Cover",
+      title: compact ? "把長文整理成一個清楚的開場主張" : "請貼上文章，生成第一頁主張",
+      lead: compact ? `來源重點：${summary}` : seed,
+      tags: ["原文", "主張", "版型", "預覽"]
+    },
+    {
+      page: 2,
+      layout: "Problem",
+      title: "為什麼這件事現在重要？",
+      lead: "整理事件背景、產業變化與使用者需要理解的主要矛盾。",
+      tags: ["背景", "變化", "問題"]
+    },
+    {
+      page: 3,
+      layout: "Matrix",
+      title: "影響會落在哪些角色身上？",
+      lead: "把利害關係人、平台、企業與內容團隊的影響拆成矩陣。",
+      tags: ["角色", "影響", "矩陣"]
+    },
+    {
+      page: 4,
+      layout: "Timeline",
+      title: "接下來可能怎麼演變？",
+      lead: "用時間軸整理短期反應、中期調整與長期結構變化。",
+      tags: ["短期", "中期", "長期"]
+    },
+    {
+      page: 5,
+      layout: "Comparison",
+      title: "不同做法的取捨是什麼？",
+      lead: "比較傳統做法、AI 協作流程與 OpenSlide SDD 的差異。",
+      tags: ["傳統", "AI", "SDD"]
+    },
+    {
+      page: 6,
+      layout: "Closing",
+      title: "最後要留下哪個判斷？",
+      lead: "收斂成一個清楚的商業科技觀點，作為簡報結論。",
+      tags: ["判斷", "結論", "下一步"]
+    }
+  ];
   return {
-    title: compact ? "把長文整理成一個清楚的開場主張" : "請貼上文章，生成第一頁主張",
-    lead: compact
-      ? `來源重點：${summary}。系統會把原文改寫成每頁主張、講述順序與 OpenSlide 可排版文字。`
-      : "貼上文章後，Gemini、Claude、OpenAI 會交叉整理內容，再生成適合簡報的頁面文字。",
-    captions: ["原文", "主張", "版型", "預覽"]
+    title: pages[0].title,
+    lead: `${pages[0].lead}。系統會把原文改寫成每頁主張、講述順序與 OpenSlide 可排版文字。`,
+    captions: ["原文", "主張", "版型", "預覽"],
+    pages
   };
+}
+
+export function buildFallbackPages(article) {
+  return fallbackOutline(article).pages;
 }
