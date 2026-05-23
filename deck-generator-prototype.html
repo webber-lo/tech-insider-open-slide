@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Deck Generator Console</title>
+    <title>TECH INSIDER Deck Workbench</title>
     <style>
       :root {
         --ink: #102a3a;
@@ -17,6 +17,8 @@
         --line: #cfe0ea;
         --white: #ffffff;
         --amber: #c98b42;
+        --ok: #2e8f7d;
+        --shadow: 0 22px 70px rgba(16, 42, 58, 0.12);
       }
 
       * {
@@ -27,16 +29,27 @@
         margin: 0;
         min-height: 100vh;
         color: var(--ink);
-        font-family: "Noto Sans TC", "Microsoft JhengHei", Inter, system-ui, sans-serif;
+        font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
         background:
-          radial-gradient(circle at 76% 20%, rgba(189, 232, 245, 0.65), transparent 30%),
-          linear-gradient(135deg, #f7f8f0 0%, #edf4f7 52%, #f9f5eb 100%);
+          linear-gradient(90deg, rgba(247, 248, 240, 0.96), rgba(239, 246, 249, 0.96)),
+          var(--paper);
+      }
+
+      button,
+      textarea,
+      select,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
       }
 
       .app {
         min-height: 100vh;
         display: grid;
-        grid-template-rows: 72px auto 1fr;
+        grid-template-rows: 64px 1fr;
       }
 
       .topbar {
@@ -45,159 +58,125 @@
         justify-content: space-between;
         padding: 0 28px;
         border-bottom: 1px solid rgba(207, 224, 234, 0.9);
-        background: rgba(255, 255, 255, 0.72);
-        backdrop-filter: blur(18px);
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(16px);
       }
 
       .brand {
         display: flex;
         align-items: center;
-        gap: 14px;
-        font-weight: 900;
+        gap: 12px;
         color: var(--navy);
+        font-weight: 900;
       }
 
       .seal {
-        width: 38px;
-        height: 38px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        background: var(--navy);
-        color: var(--white);
         display: grid;
         place-items: center;
-        letter-spacing: 0;
-        font-size: 13px;
+        color: var(--white);
+        background: var(--navy);
+        font-size: 12px;
       }
 
       .status {
-        display: flex;
-        gap: 10px;
-        align-items: center;
         color: var(--muted);
         font-size: 13px;
         font-weight: 800;
       }
 
-      .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--blue);
-      }
-
-      .workspace {
+      .shell {
         display: grid;
-        grid-template-columns: 340px 360px minmax(620px, 1fr);
+        grid-template-columns: 220px minmax(430px, 560px) minmax(560px, 1fr);
         gap: 18px;
-        padding: 18px 22px 22px;
+        padding: 20px;
       }
 
-      .intent-strip {
+      .rail,
+      .panel,
+      .preview-panel {
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: var(--shadow);
+      }
+
+      .rail {
+        border-radius: 18px;
+        padding: 16px;
+        align-self: start;
+        position: sticky;
+        top: 20px;
+      }
+
+      .step {
+        width: 100%;
         display: grid;
-        grid-template-columns: 0.8fr 1.2fr;
-        gap: 18px;
-        align-items: stretch;
-        padding: 18px 22px 0;
+        grid-template-columns: 32px 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 14px 10px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--muted);
+        text-align: left;
       }
 
-      .api-strip {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 14px;
-        align-items: center;
-        margin: 14px 22px 0;
-        padding: 14px 18px;
-        border-radius: 14px;
-        border: 1px solid rgba(201, 139, 66, 0.35);
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 240, 0.78)),
-          var(--white);
-        box-shadow: 0 18px 54px rgba(16, 42, 58, 0.06);
-      }
-
-      .api-strip strong {
+      .step.active {
+        background: rgba(189, 232, 245, 0.44);
         color: var(--navy);
-        font-size: 14px;
       }
 
-      .api-strip span {
+      .step.done .step-num {
+        background: var(--ok);
+      }
+
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        color: var(--white);
+        background: var(--royal);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .step-title {
+        display: block;
+        color: inherit;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .step-text {
         display: block;
         margin-top: 4px;
-        color: var(--muted);
         font-size: 12px;
         line-height: 1.45;
       }
 
-      .api-path {
-        padding: 8px 10px;
-        border-radius: 8px;
-        color: var(--navy);
-        background: rgba(189, 232, 245, 0.42);
-        font-size: 12px;
-        font-weight: 900;
-        white-space: nowrap;
-      }
-
-      .intent-title {
-        min-height: 88px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 14px;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(189, 232, 245, 0.36)),
-          var(--white);
-        padding: 18px 20px;
-        box-shadow: 0 18px 54px rgba(16, 42, 58, 0.07);
-      }
-
-      .intent-title strong {
-        display: block;
-        color: var(--navy);
-        font-size: 18px;
-        line-height: 1.25;
-        margin-top: 7px;
-      }
-
-      .intent-title span {
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
-      }
-
       .panel {
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.78);
-        box-shadow: 0 24px 80px rgba(16, 42, 58, 0.08);
+        min-height: calc(100vh - 104px);
+        border-radius: 18px;
         overflow: hidden;
       }
 
-      .panel.dark {
-        color: var(--white);
-        background:
-          linear-gradient(160deg, rgba(15, 40, 84, 0.98), rgba(28, 77, 141, 0.92)),
-          var(--navy);
-      }
-
       .panel-head {
-        padding: 22px 22px 16px;
-        border-bottom: 1px solid rgba(207, 224, 234, 0.8);
-      }
-
-      .dark .panel-head {
-        border-bottom-color: rgba(255, 255, 255, 0.18);
+        padding: 24px 26px 18px;
+        border-bottom: 1px solid rgba(207, 224, 234, 0.86);
       }
 
       .eyebrow {
+        margin-bottom: 8px;
+        color: var(--blue);
         font-size: 12px;
         font-weight: 900;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--blue);
-        margin-bottom: 10px;
-      }
-
-      .dark .eyebrow {
-        color: var(--pale);
       }
 
       h1,
@@ -208,14 +187,15 @@
       }
 
       h1 {
-        font-size: 25px;
-        line-height: 1.24;
-        letter-spacing: 0;
+        color: var(--navy);
+        font-size: 26px;
+        line-height: 1.25;
       }
 
       h2 {
-        font-size: 18px;
-        line-height: 1.25;
+        color: var(--navy);
+        font-size: 20px;
+        line-height: 1.3;
       }
 
       .desc {
@@ -225,24 +205,24 @@
         line-height: 1.65;
       }
 
-      .dark .desc {
-        color: rgba(255, 255, 255, 0.76);
+      .panel-body {
+        padding: 22px 26px 26px;
       }
 
-      .panel-body {
-        padding: 20px 22px 22px;
+      .screen {
+        display: none;
+      }
+
+      .screen.active {
+        display: block;
       }
 
       label {
         display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
         font-size: 12px;
         font-weight: 900;
-        color: var(--muted);
-        margin-bottom: 8px;
-      }
-
-      .dark label {
-        color: rgba(255, 255, 255, 0.76);
       }
 
       textarea,
@@ -250,17 +230,16 @@
       input {
         width: 100%;
         border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.92);
+        border-radius: 12px;
         color: var(--ink);
-        font: inherit;
+        background: rgba(255, 255, 255, 0.92);
       }
 
       textarea {
-        min-height: 252px;
-        padding: 14px;
+        min-height: 330px;
+        padding: 16px;
         resize: vertical;
-        line-height: 1.65;
+        line-height: 1.7;
       }
 
       select,
@@ -269,80 +248,167 @@
         padding: 0 12px;
       }
 
-      .field {
-        margin-bottom: 18px;
-      }
-
-      .two {
+      .row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
       }
 
+      .field {
+        margin-bottom: 18px;
+      }
+
       .button {
-        height: 48px;
         width: 100%;
+        height: 48px;
         border: 0;
-        border-radius: 10px;
-        background: var(--amber);
+        border-radius: 12px;
         color: var(--white);
+        background: var(--royal);
         font-weight: 900;
-        letter-spacing: 0;
-        cursor: default;
       }
 
-      .button.secondary {
-        background: rgba(255, 255, 255, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.24);
+      .button.primary {
+        background: var(--amber);
       }
 
-      .model-stack {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 12px;
+      .button.ghost {
+        color: var(--royal);
+        background: rgba(189, 232, 245, 0.36);
       }
 
-      .model-chip {
-        border: 1px solid rgba(189, 232, 245, 0.3);
-        border-radius: 999px;
-        padding: 7px 10px;
-        color: rgba(255, 255, 255, 0.88);
-        background: rgba(255, 255, 255, 0.09);
+      .button:disabled {
+        opacity: 0.62;
+      }
+
+      .page-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .page-row {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.86);
+        text-align: left;
+      }
+
+      .page-row.active {
+        border-color: rgba(73, 136, 196, 0.95);
+        background: #eef8fb;
+      }
+
+      .page-num {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: var(--white);
+        background: var(--navy);
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 900;
       }
 
-      .helper-note {
-        margin-top: 10px;
+      .page-title {
+        color: var(--navy);
+        font-size: 14px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+
+      .page-meta {
+        margin-top: 4px;
         color: var(--muted);
         font-size: 12px;
-        line-height: 1.55;
+      }
+
+      .badge {
+        padding: 6px 8px;
+        border-radius: 999px;
+        color: var(--royal);
+        background: rgba(189, 232, 245, 0.42);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .editor-card {
+        padding: 16px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 16px;
+        background: rgba(247, 248, 240, 0.58);
+      }
+
+      .editor-card + .editor-card {
+        margin-top: 14px;
+      }
+
+      .mini-input {
+        min-height: 96px;
+      }
+
+      .layout-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .layout-card {
+        padding: 12px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--ink);
+        text-align: left;
+      }
+
+      .layout-card.active {
+        border-color: rgba(73, 136, 196, 0.95);
+        background: #eef8fb;
+      }
+
+      .layout-card strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--navy);
+        font-size: 13px;
+      }
+
+      .layout-card span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
       }
 
       .upload-zone {
         display: grid;
-        grid-template-columns: 42px 1fr;
+        grid-template-columns: 44px 1fr;
         gap: 12px;
         align-items: center;
-        margin-top: 12px;
         padding: 14px;
-        border: 1px dashed rgba(73, 136, 196, 0.55);
-        border-radius: 12px;
-        background:
-          linear-gradient(135deg, rgba(247, 248, 240, 0.92), rgba(189, 232, 245, 0.28)),
-          rgba(255, 255, 255, 0.78);
-        cursor: pointer;
+        border: 1px dashed rgba(73, 136, 196, 0.66);
+        border-radius: 14px;
+        background: rgba(189, 232, 245, 0.22);
       }
 
-      .upload-mark {
+      .upload-zone input {
+        display: none;
+      }
+
+      .upload-icon {
         width: 42px;
         height: 42px;
         display: grid;
         place-items: center;
-        border-radius: 10px;
+        border-radius: 12px;
         color: var(--royal);
-        background: rgba(189, 232, 245, 0.46);
+        background: var(--white);
         font-size: 20px;
         font-weight: 900;
       }
@@ -351,687 +417,200 @@
         color: var(--navy);
         font-size: 13px;
         font-weight: 900;
-        margin-bottom: 3px;
       }
 
       .upload-text {
+        margin-top: 3px;
         color: var(--muted);
         font-size: 12px;
         line-height: 1.45;
       }
 
-      .upload-input {
-        display: none;
-      }
-
-      .reference-preview {
-        display: none;
-        margin-top: 10px;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        background: var(--cream);
-      }
-
-      .reference-preview img {
-        display: block;
-        width: 100%;
-        height: 96px;
-        object-fit: cover;
-      }
-
-      .reference-preview.active {
-        display: block;
-      }
-
-      .choice {
-        display: grid;
-        gap: 10px;
-      }
-
-      .choice-card {
-        display: grid;
-        grid-template-columns: 34px 1fr;
-        gap: 12px;
-        align-items: center;
-        padding: 13px;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.82);
-        cursor: pointer;
-        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-      }
-
-      .choice-card.active {
-        border-color: rgba(73, 136, 196, 0.9);
-        background: #eef8fb;
-      }
-
-      .choice-card:hover,
-      .choice-card:focus-visible {
-        transform: translateY(-1px);
-        border-color: rgba(73, 136, 196, 0.72);
-        outline: none;
-      }
-
-      .icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 9px;
-        display: grid;
-        place-items: center;
-        color: var(--white);
-        background: var(--royal);
-        font-size: 13px;
-        font-weight: 900;
-      }
-
-      .choice-title {
-        font-size: 14px;
-        font-weight: 900;
-        margin-bottom: 4px;
-      }
-
-      .choice-text {
-        font-size: 12px;
-        line-height: 1.45;
-        color: var(--muted);
-      }
-
-      .mini-plan {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        margin: 0;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 14px;
-        overflow: hidden;
-        background: rgba(207, 224, 234, 0.9);
-        box-shadow: 0 18px 54px rgba(16, 42, 58, 0.07);
-      }
-
-      .step {
-        display: grid;
-        grid-template-columns: 36px 1fr;
-        gap: 12px;
-        align-items: start;
-        padding: 16px 18px;
-        border-top: 0;
-        background: rgba(255, 255, 255, 0.86);
-      }
-
-      .num {
-        font-weight: 900;
-        color: var(--blue);
-        letter-spacing: 0.04em;
-      }
-
-      .step strong {
-        display: block;
-        font-size: 14px;
-        margin-bottom: 4px;
-      }
-
-      .step span {
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .preview {
+      .preview-panel {
+        min-height: calc(100vh - 104px);
+        border-radius: 18px;
+        padding: 18px;
         display: grid;
         grid-template-rows: auto auto 1fr;
-        min-width: 0;
+        gap: 16px;
+        align-self: start;
+        position: sticky;
+        top: 20px;
       }
 
-      .preview-head {
+      .preview-tools {
         display: flex;
         justify-content: space-between;
-        align-items: start;
-        margin-bottom: 18px;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .slide-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .slide-tab {
+        min-width: 38px;
+        height: 34px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 10px;
+        color: var(--royal);
+        background: rgba(255, 255, 255, 0.84);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .slide-tab.active {
+        color: var(--white);
+        background: var(--navy);
+        border-color: var(--navy);
       }
 
       .slide {
         position: relative;
-        width: min(100%, 980px);
+        width: 100%;
         aspect-ratio: 16 / 9;
-        margin: 0 auto;
         overflow: hidden;
-        border-radius: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
         background: var(--cream);
-        border: 1px solid rgba(207, 224, 234, 0.9);
-        box-shadow: 0 32px 80px rgba(16, 42, 58, 0.18);
+        box-shadow: 0 28px 82px rgba(16, 42, 58, 0.16);
+      }
+
+      .slide-image {
+        position: absolute;
+        inset: 0 0 0 42%;
+        background:
+          radial-gradient(circle at 45% 40%, rgba(73, 136, 196, 0.5), transparent 30%),
+          linear-gradient(135deg, rgba(189, 232, 245, 0.72), rgba(255, 255, 255, 0.06));
+        background-size: cover;
+        background-position: center;
       }
 
       .slide::before {
         content: "";
         position: absolute;
         inset: 0;
-        background:
-          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.96) 38%, rgba(251, 250, 244, 0.18) 62%, rgba(251, 250, 244, 0) 100%),
-          radial-gradient(circle at 78% 38%, rgba(189, 232, 245, 0.7), transparent 34%);
         z-index: 1;
-      }
-
-      .slide.utility {
-        background: #f8fbfd;
-      }
-
-      .slide.utility::before {
         background:
-          linear-gradient(90deg, rgba(15, 40, 84, 0.96) 0%, rgba(15, 40, 84, 0.92) 34%, rgba(247, 248, 240, 0.18) 34%, rgba(247, 248, 240, 0) 100%),
-          radial-gradient(circle at 72% 34%, rgba(189, 232, 245, 0.75), transparent 34%);
-      }
-
-      .slide.has-generated-image::before {
-        background:
-          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.98) 42%, rgba(251, 250, 244, 0.74) 56%, rgba(251, 250, 244, 0.18) 78%, rgba(251, 250, 244, 0) 100%),
-          linear-gradient(0deg, rgba(251, 250, 244, 0.92) 0%, rgba(251, 250, 244, 0) 24%);
-      }
-
-      .slide.utility.has-generated-image::before {
-        background:
-          linear-gradient(90deg, rgba(15, 40, 84, 0.98) 0%, rgba(15, 40, 84, 0.95) 38%, rgba(15, 40, 84, 0.62) 54%, rgba(15, 40, 84, 0.12) 78%, rgba(15, 40, 84, 0) 100%),
-          linear-gradient(0deg, rgba(15, 40, 84, 0.78) 0%, rgba(15, 40, 84, 0) 24%);
-      }
-
-      .slide.utility .slide-kicker,
-      .slide.utility .slide-title {
-        color: var(--white);
-      }
-
-      .slide.utility .hairline {
-        background: rgba(255, 255, 255, 0.45);
-      }
-
-      .slide.utility .slide-lead {
-        color: rgba(255, 255, 255, 0.78);
-      }
-
-      .slide.magazine {
-        background:
-          linear-gradient(135deg, #0f2854 0%, #1c4d8d 55%, #102a3a 100%);
-      }
-
-      .slide.magazine::before {
-        background:
-          linear-gradient(90deg, rgba(15, 40, 84, 0.2), rgba(15, 40, 84, 0.85)),
-          radial-gradient(circle at 24% 38%, rgba(189, 232, 245, 0.35), transparent 30%);
-      }
-
-      .slide.magazine.has-generated-image::before {
-        background:
-          linear-gradient(90deg, rgba(15, 40, 84, 0.96) 0%, rgba(15, 40, 84, 0.9) 42%, rgba(15, 40, 84, 0.58) 58%, rgba(15, 40, 84, 0.16) 82%, rgba(15, 40, 84, 0) 100%),
-          linear-gradient(0deg, rgba(15, 40, 84, 0.82) 0%, rgba(15, 40, 84, 0) 25%);
-      }
-
-      .slide.magazine .slide-copy {
-        width: 56%;
-      }
-
-      .slide.magazine .slide-kicker,
-      .slide.magazine .slide-title,
-      .slide.magazine .slide-lead {
-        color: var(--white);
-      }
-
-      .slide.magazine .hairline {
-        background: rgba(189, 232, 245, 0.55);
-      }
-
-      .slide.magazine .caption {
-        background: rgba(255, 255, 255, 0.13);
-        color: var(--white);
-        border-color: rgba(255, 255, 255, 0.2);
+          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.98) 42%, rgba(251, 250, 244, 0.74) 58%, rgba(251, 250, 244, 0.16) 82%, rgba(251, 250, 244, 0) 100%),
+          linear-gradient(0deg, rgba(251, 250, 244, 0.95), rgba(251, 250, 244, 0) 26%);
       }
 
       .slide-copy {
         position: absolute;
-        z-index: 3;
-        left: 5%;
-        top: 7%;
-        width: 47%;
+        z-index: 2;
+        left: 5.5%;
+        top: 8%;
+        width: 45%;
       }
 
       .slide-kicker {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 12px;
-        font-size: 13px;
-        font-weight: 900;
+        gap: 10px;
+        margin-bottom: 38px;
         color: var(--navy);
-        margin-bottom: 54px;
+        font-size: 12px;
+        font-weight: 900;
       }
 
       .slide-kicker::before {
         content: "";
-        width: 30px;
-        height: 30px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
         background: var(--navy);
       }
 
       .slide-title {
-        font-size: clamp(28px, 3.2vw, 48px);
-        line-height: 1.17;
-        font-weight: 900;
         color: var(--navy);
-        margin-bottom: 22px;
+        font-size: clamp(27px, 3.1vw, 48px);
+        font-weight: 900;
+        line-height: 1.15;
       }
 
       .hairline {
-        height: 2px;
         width: 92%;
+        height: 2px;
+        margin: 20px 0 18px;
         background: var(--line);
-        margin-bottom: 20px;
       }
 
       .slide-lead {
-        font-size: clamp(13px, 1.12vw, 17px);
-        line-height: 1.75;
-        color: var(--slate);
-        max-width: 88%;
-      }
-
-      .visual {
-        position: absolute;
-        z-index: 2;
-        right: 4%;
-        top: 12%;
-        width: 50%;
-        height: 60%;
-      }
-
-      .visual.generated {
-        z-index: 0;
-        right: 0;
-        top: 0;
-        width: 64%;
-        height: 100%;
-        border-radius: 0;
-        overflow: hidden;
-        background-size: cover;
-        background-position: center;
-        box-shadow: none;
-      }
-
-      .visual.generated > * {
-        display: none;
-      }
-
-      .building {
-        position: absolute;
-        right: 0;
-        top: 8%;
-        width: 34%;
-        height: 56%;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.78);
-        border: 2px solid rgba(73, 136, 196, 0.25);
-      }
-
-      .building::before {
-        content: "";
-        position: absolute;
-        left: 10%;
-        right: 10%;
-        top: -18%;
-        height: 22%;
-        border-radius: 10px 10px 4px 4px;
-        background: var(--blue);
-      }
-
-      .people {
-        position: absolute;
-        left: 10%;
-        bottom: 12%;
-        width: 34%;
-        height: 46%;
-        border-radius: 999px 999px 16px 16px;
-        background: rgba(73, 136, 196, 0.9);
-      }
-
-      .people::before,
-      .people::after {
-        content: "";
-        position: absolute;
-        border-radius: 50%;
-        background: #f1c7a5;
-      }
-
-      .people::before {
-        width: 38%;
-        aspect-ratio: 1;
-        left: 10%;
-        top: -22%;
-      }
-
-      .people::after {
-        width: 34%;
-        aspect-ratio: 1;
-        right: 12%;
-        top: -18%;
-      }
-
-      .arrow {
-        position: absolute;
-        left: 42%;
-        top: 45%;
-        width: 26%;
-        height: 12px;
-        border-radius: 999px;
-        background: var(--blue);
-      }
-
-      .arrow::after {
-        content: "";
-        position: absolute;
-        right: -18px;
-        top: -10px;
-        border-left: 20px solid var(--blue);
-        border-top: 16px solid transparent;
-        border-bottom: 16px solid transparent;
-      }
-
-      .question {
-        position: absolute;
-        left: 54%;
-        top: 17%;
-        font-size: clamp(68px, 8vw, 118px);
-        font-weight: 900;
-        color: var(--navy);
+        color: var(--muted);
+        font-size: clamp(13px, 1.1vw, 17px);
+        line-height: 1.72;
       }
 
       .caption-row {
         position: absolute;
-        z-index: 3;
-        left: 5%;
-        right: 5%;
+        z-index: 2;
+        left: 5.5%;
+        right: 5.5%;
         bottom: 7%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
+        gap: 10px;
       }
 
       .caption {
-        height: 46px;
+        min-height: 42px;
         display: grid;
         place-items: center;
+        padding: 0 8px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
         border-radius: 10px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        background: rgba(255, 255, 255, 0.78);
         color: var(--royal);
-        font-size: 13px;
-        font-weight: 900;
-      }
-
-      .reference-chip {
-        position: absolute;
-        z-index: 4;
-        right: 5%;
-        top: 6%;
-        display: none;
-        padding: 8px 11px;
-        border-radius: 999px;
         background: rgba(255, 255, 255, 0.82);
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        color: var(--royal);
         font-size: 12px;
         font-weight: 900;
-      }
-
-      .reference-chip.active {
-        display: block;
+        text-align: center;
       }
 
       .footer {
         position: absolute;
-        z-index: 3;
-        right: 5%;
-        bottom: 2.6%;
-        font-size: 12px;
-        color: var(--muted);
-      }
-
-      .deck-strip {
-        display: none;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
-        margin: 16px 0;
-      }
-
-      .deck-strip.active {
-        display: grid;
-      }
-
-      .deck-card {
-        min-height: 112px;
-        padding: 12px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.82);
-        box-shadow: 0 14px 36px rgba(16, 42, 58, 0.07);
-        cursor: pointer;
-        text-align: left;
-      }
-
-      .deck-card.active {
-        border-color: rgba(73, 136, 196, 0.9);
-        background: #eef8fb;
-      }
-
-      .deck-card-num {
-        color: var(--blue);
-        font-size: 11px;
-        font-weight: 900;
-        margin-bottom: 7px;
-      }
-
-      .deck-card-title {
-        color: var(--navy);
-        font-size: 13px;
-        font-weight: 900;
-        line-height: 1.35;
-        margin-bottom: 6px;
-      }
-
-      .deck-card-layout {
+        z-index: 2;
+        right: 5.5%;
+        bottom: 2.7%;
         color: var(--muted);
         font-size: 11px;
         font-weight: 800;
       }
 
-      .deck-output {
+      .empty {
+        padding: 26px;
+        border: 1px dashed rgba(96, 118, 132, 0.42);
+        border-radius: 16px;
+        color: var(--muted);
+        background: rgba(247, 248, 240, 0.58);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .notice {
         display: none;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-        margin-top: 18px;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
       }
 
-      .deck-output.active {
-        display: grid;
+      .notice.active {
+        display: block;
       }
 
-      .mini-slide {
-        position: relative;
-        min-height: 260px;
-        overflow: hidden;
-        border-radius: 12px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        background: var(--cream);
-        box-shadow: 0 18px 46px rgba(16, 42, 58, 0.11);
-        cursor: pointer;
-        text-align: left;
-      }
-
-      .mini-slide::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.94) 47%, rgba(251, 250, 244, 0.12) 75%),
-          radial-gradient(circle at 78% 42%, rgba(189, 232, 245, 0.76), transparent 34%);
-      }
-
-      .mini-copy {
-        position: absolute;
-        z-index: 2;
-        left: 7%;
-        top: 11%;
-        width: 58%;
-      }
-
-      .mini-kicker {
-        color: var(--royal);
-        font-size: 10px;
-        font-weight: 900;
-        margin-bottom: 14px;
-      }
-
-      .mini-title {
-        color: var(--navy);
-        font-size: 17px;
-        line-height: 1.22;
-        font-weight: 900;
-      }
-
-      .mini-lead {
-        margin-top: 9px;
-        color: var(--slate);
-        font-size: 10px;
-        line-height: 1.45;
-      }
-
-      .mini-art {
-        position: absolute;
-        z-index: 1;
-        right: 7%;
-        top: 17%;
-        width: 34%;
-        height: 48%;
-        opacity: 0.24;
-      }
-
-      .mini-art::before,
-      .mini-art::after {
-        content: "";
-        position: absolute;
-        border-radius: 999px;
-      }
-
-      .mini-art::before {
-        inset: 8% 0 auto auto;
-        width: 70%;
-        height: 70%;
-        background: linear-gradient(135deg, rgba(73, 136, 196, 0.95), rgba(189, 232, 245, 0.58));
-      }
-
-      .mini-art::after {
-        left: 0;
-        bottom: 0;
-        width: 56%;
-        height: 28%;
-        background: rgba(201, 139, 66, 0.65);
-      }
-
-      .mini-tags {
-        position: absolute;
-        z-index: 2;
-        left: 7%;
-        right: 7%;
-        bottom: 25%;
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-
-      .mini-tag {
-        padding: 5px 7px;
-        border-radius: 7px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        background: rgba(255, 255, 255, 0.78);
-        color: var(--royal);
-        font-size: 9px;
-        font-weight: 900;
-      }
-
-      .page-actions {
-        position: absolute;
-        z-index: 3;
-        left: 7%;
-        right: 7%;
-        bottom: 7%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .page-actions select,
-      .page-actions button {
-        height: 34px;
-        border-radius: 8px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--navy);
-        font-size: 11px;
-        font-weight: 900;
-        padding: 0 8px;
-      }
-
-      .page-actions button {
-        background: var(--royal);
-        color: var(--white);
-      }
-
-      .mini-slide.has-image .mini-art {
-        opacity: 1;
-      }
-
-      .mini-art.generated {
-        opacity: 1;
-        border-radius: 14px;
-        overflow: hidden;
-        background-size: cover;
-        background-position: center;
-        box-shadow: 0 12px 30px rgba(16, 42, 58, 0.15);
-      }
-
-      .mini-art.generated::before,
-      .mini-art.generated::after {
-        display: none;
-      }
-
-      @media (max-width: 1200px) {
-        .intent-strip {
+      @media (max-width: 1260px) {
+        .shell {
           grid-template-columns: 1fr;
         }
 
-        .api-strip {
-          grid-template-columns: 1fr;
-        }
-
-        .api-path {
-          white-space: normal;
-        }
-
-        .mini-plan {
-          grid-template-columns: 1fr;
-        }
-
-        .workspace {
-          grid-template-columns: 1fr;
-        }
-
-        .slide {
-          width: 100%;
-        }
-
-        .deck-strip {
-          grid-template-columns: 1fr;
-        }
-
-        .deck-output {
-          grid-template-columns: 1fr;
+        .rail,
+        .preview-panel {
+          position: static;
         }
       }
     </style>
@@ -1039,363 +618,220 @@
   <body>
     <div class="app">
       <header class="topbar">
-        <div class="brand">
-          <div class="seal">TI</div>
-          <div>Deck Generator Console</div>
-        </div>
-        <div class="status"><span class="dot"></span>SDD driven · OpenSlide preview · Image slots</div>
+        <div class="brand"><div class="seal">TI</div><div>Deck Workbench</div></div>
+        <div class="status">內容先行，版型與配圖逐頁處理</div>
       </header>
 
-      <section class="intent-strip" aria-label="product intent">
-        <div class="intent-title">
-          <span>Product intent</span>
-          <strong>先讓使用者理解：這不是 PPT 軟體，而是 AI 到 OpenSlide 的中介工作台。</strong>
-        </div>
-        <div class="mini-plan">
-          <div class="step"><div class="num">01</div><div><strong>多模型整理文字</strong><span>Gemini、Claude、OpenAI 交叉整理主張與順序。</span></div></div>
-          <div class="step"><div class="num">02</div><div><strong>Open Design 建議版型</strong><span>依內容選封面、矩陣、比較、時間軸或敘事頁。</span></div></div>
-          <div class="step"><div class="num">03</div><div><strong>無文字配圖建議</strong><span>Gemini 與 OpenAI 提風格，圖片不得出現任何文字。</span></div></div>
-        </div>
-      </section>
-
-      <section class="api-strip" aria-label="api key setup">
-        <div>
-          <strong>API 尚未填入：三個平台的 key 要放在安全區，不要寫進 GitHub 前端。</strong>
-          <span>本機版會讀這個外部檔案；GitHub Pages 是靜態頁，正式串 Gemini / Claude / OpenAI 時要改走後端 secrets。</span>
-        </div>
-        <div class="api-path">C:\Users\webbe\.tech-insider-sdd\.env</div>
-      </section>
-
-      <div class="workspace">
-        <section class="panel dark">
-          <div class="panel-head">
-            <div class="eyebrow">Brief</div>
-            <h1>把長文變成可以簡報的敘事</h1>
-            <p class="desc">貼文章、採訪稿或會議紀錄；Gemini、Claude、OpenAI 先交叉整理篇章，不碰版面像素。</p>
-          </div>
-          <div class="panel-body">
-            <div class="field">
-              <label>文章或資料</label>
-              <textarea>貼上一大篇文章。系統會請 Gemini、Claude、OpenAI 交叉討論，整理成：每頁主張、重點、講述順序、建議版型，以及哪些頁需要主視覺。</textarea>
-            </div>
-            <div class="model-stack">
-              <span class="model-chip">Gemini 分析資料脈絡</span>
-              <span class="model-chip">Claude 整理敘事結構</span>
-              <span class="model-chip">OpenAI 收斂簡報文字</span>
-            </div>
-            <div class="two field">
-              <div>
-                <label>受眾</label>
-                <select><option>內部企劃</option><option>高階主管</option><option>合作夥伴</option></select>
-              </div>
-              <div>
-                <label>頁數</label>
-                <select><option>6-8 頁</option><option>10-12 頁</option><option>3 頁摘要</option></select>
-              </div>
-            </div>
-            <button class="button" id="generate-outline" type="button">生成每頁內容</button>
-          </div>
-        </section>
+      <main class="shell">
+        <nav class="rail" aria-label="workflow">
+          <button class="step active" data-step="content" type="button">
+            <span class="step-num">1</span>
+            <span><span class="step-title">整理內容</span><span class="step-text">長文變成每頁主張</span></span>
+          </button>
+          <button class="step" data-step="pages" type="button">
+            <span class="step-num">2</span>
+            <span><span class="step-title">逐頁編輯</span><span class="step-text">每頁選版型、改字、產圖</span></span>
+          </button>
+          <button class="step" data-step="export" type="button">
+            <span class="step-num">3</span>
+            <span><span class="step-title">確認輸出</span><span class="step-text">檢查整份 deck</span></span>
+          </button>
+        </nav>
 
         <section class="panel">
           <div class="panel-head">
-            <div class="eyebrow">Direction</div>
-            <h2>內容出來後，再逐頁選版型與配圖</h2>
-            <p class="desc">先不要急著套版。等每頁主張確認後，再讓 Open Design 協助每頁挑 layout。</p>
+            <div class="eyebrow" id="panel-eyebrow">Step 1</div>
+            <h1 id="panel-title">先把長文整理成簡報內容</h1>
+            <p class="desc" id="panel-desc">這一步只處理資料：每頁標題、主張、重點。先不要選版型，也不要產圖。</p>
           </div>
-          <div class="panel-body">
-            <div class="field">
-              <label>設計方向</label>
-              <div class="choice">
-                <div class="choice-card active" data-design="editorial" role="button" tabindex="0" aria-pressed="true">
-                  <div class="icon">01</div>
-                  <div><div class="choice-title">Editorial Explainer</div><div class="choice-text">適合政策、科技新聞、議題拆解；文字與插畫融合。</div></div>
-                </div>
-                <div class="choice-card" data-design="utility" role="button" tabindex="0" aria-pressed="false">
-                  <div class="icon">02</div>
-                  <div><div class="choice-title">Tech Utility</div><div class="choice-text">適合策略簡報、商業科技頻道企劃與工作流。</div></div>
-                </div>
-                <div class="choice-card" data-design="magazine" role="button" tabindex="0" aria-pressed="false">
-                  <div class="icon">03</div>
-                  <div><div class="choice-title">Magazine Narrative</div><div class="choice-text">適合更像雜誌封面與專題報導的視覺敘事。</div></div>
-                </div>
-              </div>
-            </div>
 
-            <div class="field">
-              <label>這張無文字配圖要幫簡報做什麼？</label>
-              <select><option>讓抽象議題變好懂</option><option>當封面第一眼主視覺</option><option>補充證據或案例畫面</option><option>建立頁面氣氛與情境</option></select>
-              <div class="helper-note">Gemini 與 OpenAI 只提出風格、構圖與情境建議；配圖不得含任何文字，中文字、頁碼、標籤仍交給 OpenSlide。</div>
-              <label class="upload-zone" for="reference-image">
-                <div class="upload-mark">+</div>
-                <div>
-                  <div class="upload-title" id="upload-title">上傳範例圖片</div>
-                  <div class="upload-text" id="upload-text">提供喜歡的風格、構圖或氣氛參考；系統只學習視覺方向，不讀取圖片裡的文字。</div>
-                </div>
-              </label>
-              <input class="upload-input" id="reference-image" type="file" accept="image/*" />
-              <div class="reference-preview" id="reference-preview">
-                <img id="reference-image-preview" alt="範例圖片預覽" />
+          <div class="panel-body">
+            <section class="screen active" id="screen-content">
+              <div class="field">
+                <label for="article-input">文章或資料</label>
+                <textarea id="article-input">AI 正在改變內容產業。媒體需要先把長文整理成清楚的每頁主張，再依照每頁主張選擇版型與圖片。圖片不應包含任何文字；標題、內文、標籤與頁碼應該交給 OpenSlide 排版。好的簡報生成工具不該一開始就混合所有控制項，而應該把資料處理、逐頁設計、輸出檢查拆成清楚步驟。</textarea>
               </div>
-            </div>
-            <button class="button secondary" id="generate-image-style" type="button">產生無文字配圖風格</button>
+              <div class="row">
+                <div class="field">
+                  <label for="audience-input">對象</label>
+                  <select id="audience-input">
+                    <option>商業讀者</option>
+                    <option>高階主管</option>
+                    <option>內容團隊</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="page-count-input">頁數</label>
+                  <select id="page-count-input">
+                    <option>6-8 頁</option>
+                    <option>3 頁提案</option>
+                    <option>10-12 頁</option>
+                  </select>
+                </div>
+              </div>
+              <button class="button primary" id="generate-outline" type="button">生成每頁內容</button>
+              <p class="notice" id="content-notice"></p>
+            </section>
+
+            <section class="screen" id="screen-pages">
+              <div id="page-editor-empty" class="empty">請先在第一步生成每頁內容。生成後，這裡會出現逐頁編輯工具。</div>
+              <div id="page-editor" hidden>
+                <div class="editor-card">
+                  <div class="field">
+                    <label for="page-title-input">本頁標題</label>
+                    <input id="page-title-input" />
+                  </div>
+                  <div class="field">
+                    <label for="page-lead-input">本頁主張</label>
+                    <textarea class="mini-input" id="page-lead-input"></textarea>
+                  </div>
+                </div>
+
+                <div class="editor-card">
+                  <label>本頁版型</label>
+                  <div class="layout-grid" id="layout-grid">
+                    <button class="layout-card active" data-layout="Cover" type="button"><strong>Cover</strong><span>大標題加融合式主視覺</span></button>
+                    <button class="layout-card" data-layout="Matrix" type="button"><strong>Matrix</strong><span>比較角色、策略或條件</span></button>
+                    <button class="layout-card" data-layout="Timeline" type="button"><strong>Timeline</strong><span>事件順序與發展脈絡</span></button>
+                    <button class="layout-card" data-layout="Comparison" type="button"><strong>Comparison</strong><span>兩種觀點或方案對照</span></button>
+                  </div>
+                </div>
+
+                <div class="editor-card">
+                  <div class="field">
+                    <label for="image-purpose-input">配圖方向</label>
+                    <select id="image-purpose-input">
+                      <option>讓抽象議題變好懂</option>
+                      <option>呈現商業科技場景</option>
+                      <option>做成雜誌式主視覺</option>
+                      <option>用資料感與流程感表現</option>
+                    </select>
+                  </div>
+                  <label class="upload-zone" for="reference-image">
+                    <span class="upload-icon">+</span>
+                    <span>
+                      <span class="upload-title" id="upload-title">上傳參考圖片</span>
+                      <span class="upload-text" id="upload-text">只作為風格參考；產出的配圖仍不放任何文字。</span>
+                    </span>
+                    <input id="reference-image" type="file" accept="image/*" />
+                  </label>
+                  <div style="margin-top: 12px">
+                    <button class="button" id="generate-page-image" type="button">產生本頁配圖</button>
+                  </div>
+                  <p class="notice" id="image-notice"></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="screen" id="screen-export">
+              <div id="export-empty" class="empty">還沒有內容可以輸出。請先生成每頁內容。</div>
+              <div id="export-list" class="page-list"></div>
+            </section>
           </div>
         </section>
 
-        <section class="preview">
-          <div class="preview-head">
+        <aside class="preview-panel">
+          <div class="preview-tools">
             <div>
               <div class="eyebrow">Artifact Preview</div>
-              <h2 id="preview-title">目前套用：Editorial Explainer</h2>
-              <p class="desc" id="preview-desc">選擇左側設計方向後，這裡即時切換完整 slide 預覽；配圖無文字，文字由 OpenSlide 排版。</p>
+              <h2 id="preview-heading">目前預覽</h2>
+              <p class="desc" id="preview-note">右側永遠只預覽當前頁，不把所有控制項塞在一起。</p>
             </div>
+            <button class="button ghost" id="go-pages" type="button" style="width: 132px">逐頁編輯</button>
           </div>
-
-          <div class="deck-strip" id="deck-strip" aria-label="generated slide deck"></div>
-
+          <div class="slide-tabs" id="slide-tabs"></div>
           <div class="slide" id="artifact-slide">
+            <div class="slide-image" id="slide-image" aria-hidden="true"></div>
             <div class="slide-copy">
-              <div class="slide-kicker" id="slide-kicker">政經局勢｜議題整理</div>
-              <div class="slide-title" id="slide-title">當制度改變時，誰需要重新理解規則？</div>
+              <div class="slide-kicker" id="slide-kicker">TECH INSIDER</div>
+              <div class="slide-title" id="slide-title">先把內容整理好，再處理設計</div>
               <div class="hairline"></div>
-              <p class="slide-lead" id="slide-lead">模型先整理長文，產出每頁主張；圖片模型只生成右側場景。最後由 OpenSlide 把文字、標籤、頁碼與主視覺融合成同一頁。</p>
+              <p class="slide-lead" id="slide-lead">這個工作台把資料處理、逐頁設計、配圖和輸出檢查拆開，避免文字與圖片互相打架。</p>
             </div>
-
-            <div class="visual" id="main-visual">
-              <div class="building"></div>
-              <div class="people"></div>
-              <div class="arrow"></div>
-              <div class="question">?</div>
-            </div>
-
             <div class="caption-row">
-              <div class="caption" id="caption-1">文字整理</div>
-              <div class="caption" id="caption-2">主視覺生成</div>
-              <div class="caption" id="caption-3">SDD 套版</div>
-              <div class="caption" id="caption-4">匯出分享</div>
+              <div class="caption" id="caption-1">內容</div>
+              <div class="caption" id="caption-2">版型</div>
+              <div class="caption" id="caption-3">配圖</div>
+              <div class="caption" id="caption-4">輸出</div>
             </div>
-            <div class="reference-chip" id="reference-chip">已加入範例圖風格參考</div>
-            <div class="footer" id="slide-footer">Slide 1｜封面</div>
+            <div class="footer" id="slide-footer">Slide 1｜Draft</div>
           </div>
-
-          <div class="deck-output" id="deck-output" aria-label="complete generated deck"></div>
-        </section>
-      </div>
+        </aside>
+      </main>
     </div>
+
     <script>
-      const previews = {
-        editorial: {
-          title: "目前套用：Editorial Explainer",
-          desc: "適合把政策、科技新聞或複雜議題拆成容易理解的敘事頁；配圖無文字，文字由 OpenSlide 排版。",
-          kicker: "政經局勢｜議題整理",
-          slideTitle: "當制度改變時，誰需要重新理解規則？",
-          lead: "模型先整理長文，產出每頁主張；圖片模型只生成右側場景。最後由 OpenSlide 把文字、標籤、頁碼與主視覺融合成同一頁。",
-          captions: ["文字整理", "主視覺生成", "SDD 套版", "匯出分享"],
-          className: ""
-        },
-        utility: {
-          title: "目前套用：Tech Utility",
-          desc: "適合策略簡報與工作流說明，畫面更像操作台：左側定義判斷，右側呈現系統產出。",
-          kicker: "AI 工作流｜策略提案",
-          slideTitle: "把文章變成簡報，需要哪幾個可控步驟？",
-          lead: "三個模型先整理內容分工，Open Design 負責版型建議，OpenSlide 最後接手排版、頁碼、標籤與輸出。",
-          captions: ["資料輸入", "模型交叉", "版型建議", "簡報輸出"],
-          className: "utility"
-        },
-        magazine: {
-          title: "目前套用：Magazine Narrative",
-          desc: "適合專題感較強的提案或封面頁，保留更大的情緒張力與主視覺空間。",
-          kicker: "TECH INSIDER｜專題敘事",
-          slideTitle: "科技內容要先被看見，才有機會被理解",
-          lead: "主視覺負責建立情境與節奏，但不承擔任何文字；標題、摘要與資訊層級仍由 OpenSlide 精準控制。",
-          captions: ["主張", "情境", "版面", "沉澱"],
-          className: "magazine"
-        }
+      const state = {
+        step: "content",
+        selected: 0,
+        referenceImage: false,
+        pages: []
       };
 
-      const cards = document.querySelectorAll(".choice-card[data-design]");
-      const slide = document.getElementById("artifact-slide");
-      const previewTitle = document.getElementById("preview-title");
-      const previewDesc = document.getElementById("preview-desc");
+      const stepLabels = {
+        content: ["Step 1", "先把長文整理成簡報內容", "這一步只處理資料：每頁標題、主張、重點。先不要選版型，也不要產圖。"],
+        pages: ["Step 2", "逐頁編輯每張 slide", "一次只處理一頁：改字、選版型、產生本頁配圖。"],
+        export: ["Step 3", "確認整份簡報", "檢查每頁是否都有清楚主張、合適版型與必要配圖。"]
+      };
+
+      const fallbackTags = ["主張", "重點", "版型", "配圖"];
+      const screens = {
+        content: document.getElementById("screen-content"),
+        pages: document.getElementById("screen-pages"),
+        export: document.getElementById("screen-export")
+      };
+
+      const articleInput = document.getElementById("article-input");
+      const audienceInput = document.getElementById("audience-input");
+      const pageCountInput = document.getElementById("page-count-input");
+      const imagePurposeInput = document.getElementById("image-purpose-input");
+      const generateOutline = document.getElementById("generate-outline");
+      const generatePageImage = document.getElementById("generate-page-image");
+      const contentNotice = document.getElementById("content-notice");
+      const imageNotice = document.getElementById("image-notice");
+      const pageEditor = document.getElementById("page-editor");
+      const pageEditorEmpty = document.getElementById("page-editor-empty");
+      const pageTitleInput = document.getElementById("page-title-input");
+      const pageLeadInput = document.getElementById("page-lead-input");
+      const layoutGrid = document.getElementById("layout-grid");
+      const slideTabs = document.getElementById("slide-tabs");
+      const exportList = document.getElementById("export-list");
+      const exportEmpty = document.getElementById("export-empty");
+      const referenceImage = document.getElementById("reference-image");
+      const uploadTitle = document.getElementById("upload-title");
+      const uploadText = document.getElementById("upload-text");
+
+      const panelEyebrow = document.getElementById("panel-eyebrow");
+      const panelTitle = document.getElementById("panel-title");
+      const panelDesc = document.getElementById("panel-desc");
+      const previewHeading = document.getElementById("preview-heading");
+      const previewNote = document.getElementById("preview-note");
+      const slideImage = document.getElementById("slide-image");
       const slideKicker = document.getElementById("slide-kicker");
       const slideTitle = document.getElementById("slide-title");
       const slideLead = document.getElementById("slide-lead");
       const slideFooter = document.getElementById("slide-footer");
-      const mainVisual = document.getElementById("main-visual");
-      const deckStrip = document.getElementById("deck-strip");
-      const deckOutput = document.getElementById("deck-output");
-      const generateOutline = document.getElementById("generate-outline");
-      const generateImageStyle = document.getElementById("generate-image-style");
-      const articleInput = document.querySelector("textarea");
-      const audienceInput = document.querySelectorAll("select")[0];
-      const pageCountInput = document.querySelectorAll("select")[1];
-      const imagePurposeInput = document.querySelectorAll("select")[2];
-      const referenceInput = document.getElementById("reference-image");
-      const referencePreview = document.getElementById("reference-preview");
-      const referenceImagePreview = document.getElementById("reference-image-preview");
-      const referenceChip = document.getElementById("reference-chip");
-      const uploadTitle = document.getElementById("upload-title");
-      const uploadText = document.getElementById("upload-text");
       const captions = [
         document.getElementById("caption-1"),
         document.getElementById("caption-2"),
         document.getElementById("caption-3"),
         document.getElementById("caption-4")
       ];
-      let currentDesign = "editorial";
-      let hasReferenceImage = false;
-      let generatedPages = [];
 
-      function applyDesign(key) {
-        const data = previews[key];
-        if (!data) return;
-        currentDesign = key;
-        cards.forEach((card) => {
-          const selected = card.dataset.design === key;
-          card.classList.toggle("active", selected);
-          card.setAttribute("aria-pressed", selected ? "true" : "false");
+      function goStep(step) {
+        state.step = step;
+        document.querySelectorAll(".step").forEach((button) => {
+          const active = button.dataset.step === step;
+          button.classList.toggle("active", active);
+          button.classList.toggle("done", button.dataset.step === "content" && state.pages.length > 0);
         });
-        slide.classList.remove("utility", "magazine");
-        if (data.className) slide.classList.add(data.className);
-        previewTitle.textContent = data.title;
-        previewDesc.textContent = data.desc;
-        slideKicker.textContent = data.kicker;
-        slideTitle.textContent = data.slideTitle;
-        slideLead.textContent = data.lead;
-        captions.forEach((caption, index) => {
-          caption.textContent = data.captions[index];
-        });
+        Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("active", key === step));
+        const [eyebrow, title, desc] = stepLabels[step];
+        panelEyebrow.textContent = eyebrow;
+        panelTitle.textContent = title;
+        panelDesc.textContent = desc;
+        renderAll();
       }
-
-      function renderMainPage(page, index) {
-        if (!page) return;
-        previewTitle.textContent = `資料整理完成：${generatedPages.length || 1} 頁內容`;
-        previewDesc.textContent = "先確認每頁內容，再在每一頁卡片上選版型、產生無文字配圖。";
-        slideKicker.textContent = `Page ${page.page || index + 1}｜${page.layout || "尚未選版型"}`;
-        slideTitle.textContent = page.title || `第 ${index + 1} 頁`;
-        slideLead.textContent = page.lead || "";
-        slideFooter.textContent = `Slide ${page.page || index + 1}｜${page.layout || "內容草稿"}`;
-        const tags = Array.isArray(page.tags) && page.tags.length ? page.tags : ["主張", "重點", "版型", "預覽"];
-        captions.forEach((caption, tagIndex) => {
-          caption.textContent = tags[tagIndex] || ["主張", "重點", "版型", "預覽"][tagIndex];
-        });
-        if (page.imageUrl) {
-          slide.classList.add("has-generated-image");
-          mainVisual.classList.add("generated");
-          mainVisual.style.backgroundImage = `url("${page.imageUrl}")`;
-        } else {
-          slide.classList.remove("has-generated-image");
-          mainVisual.classList.remove("generated");
-          mainVisual.style.backgroundImage = "";
-        }
-        [...deckStrip.querySelectorAll(".deck-card")].forEach((card, cardIndex) => {
-          card.classList.toggle("active", cardIndex === index);
-        });
-      }
-
-      function renderDeckStrip(pages) {
-        generatedPages = pages || [];
-        deckStrip.innerHTML = "";
-        deckOutput.innerHTML = "";
-        deckStrip.classList.toggle("active", generatedPages.length > 0);
-        deckOutput.classList.toggle("active", generatedPages.length > 0);
-        generatedPages.forEach((page, index) => {
-          const card = document.createElement("button");
-          card.type = "button";
-          card.className = `deck-card${index === 0 ? " active" : ""}`;
-          card.innerHTML = `
-            <div class="deck-card-num">Slide ${page.page || index + 1}</div>
-            <div class="deck-card-title"></div>
-            <div class="deck-card-layout"></div>
-          `;
-          card.querySelector(".deck-card-title").textContent = page.title || `第 ${index + 1} 頁`;
-          card.querySelector(".deck-card-layout").textContent = page.layout || "尚未選版型";
-          card.addEventListener("click", () => renderMainPage(page, index));
-          deckStrip.appendChild(card);
-
-          const mini = document.createElement("button");
-          mini.type = "button";
-          mini.className = "mini-slide";
-          const tags = Array.isArray(page.tags) && page.tags.length ? page.tags : ["主張", "重點", "版型"];
-          mini.innerHTML = `
-            <div class="mini-copy">
-              <div class="mini-kicker"></div>
-              <div class="mini-title"></div>
-              <div class="mini-lead"></div>
-            </div>
-            <div class="mini-art" aria-hidden="true"></div>
-            <div class="mini-tags"></div>
-            <div class="page-actions">
-              <select aria-label="選擇本頁版型">
-                <option value="">選本頁版型</option>
-                <option>Cover</option>
-                <option>Problem</option>
-                <option>Matrix</option>
-                <option>Timeline</option>
-                <option>Comparison</option>
-                <option>Closing</option>
-              </select>
-              <button type="button">產生本頁配圖</button>
-            </div>
-          `;
-          mini.querySelector(".mini-kicker").textContent = `Slide ${page.page || index + 1}｜內容草稿`;
-          mini.querySelector(".mini-title").textContent = page.title || `第 ${index + 1} 頁`;
-          mini.querySelector(".mini-lead").textContent = page.lead || "";
-          const tagWrap = mini.querySelector(".mini-tags");
-          tags.slice(0, 4).forEach((tag) => {
-            const chip = document.createElement("span");
-            chip.className = "mini-tag";
-            chip.textContent = tag;
-            tagWrap.appendChild(chip);
-          });
-          mini.addEventListener("click", () => renderMainPage(page, index));
-          const layoutSelect = mini.querySelector("select");
-          const imageButton = mini.querySelector("button");
-          layoutSelect.addEventListener("click", (event) => event.stopPropagation());
-          layoutSelect.addEventListener("change", (event) => {
-            page.layout = event.target.value;
-            mini.querySelector(".mini-kicker").textContent = `Slide ${page.page || index + 1}｜${page.layout || "內容草稿"}`;
-            card.querySelector(".deck-card-layout").textContent = page.layout || "尚未選版型";
-            renderMainPage(page, index);
-          });
-          imageButton.addEventListener("click", async (event) => {
-            event.stopPropagation();
-            imageButton.textContent = "配圖中...";
-            try {
-              const data = await postJson("/api/generate-image", {
-                title: page.title || "",
-                lead: page.lead || "",
-                layout: page.layout || "",
-                purpose: imagePurposeInput.value,
-                design: currentDesign
-              });
-              if (!data.ok || !data.imageDataUrl) throw new Error(data.error || "Image generation failed");
-              page.imageUrl = data.imageDataUrl;
-              mini.classList.add("has-image");
-              const miniArt = mini.querySelector(".mini-art");
-              miniArt.classList.add("generated");
-              miniArt.style.backgroundImage = `url("${page.imageUrl}")`;
-              page.hasImage = true;
-              imageButton.textContent = "已產生配圖";
-              renderMainPage(page, index);
-            } catch {
-              imageButton.textContent = "配圖失敗";
-            }
-          });
-          deckOutput.appendChild(mini);
-        });
-        renderMainPage(generatedPages[0], 0);
-      }
-
-      cards.forEach((card) => {
-        card.addEventListener("click", () => applyDesign(card.dataset.design));
-        card.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            applyDesign(card.dataset.design);
-          }
-        });
-      });
 
       async function postJson(url, payload) {
         const response = await fetch(url, {
@@ -1407,72 +843,196 @@
         return response.json();
       }
 
+      function currentPage() {
+        return state.pages[state.selected];
+      }
+
+      function normalizePages(pages) {
+        return pages.map((page, index) => ({
+          page: page.page || index + 1,
+          title: page.title || `第 ${index + 1} 頁`,
+          lead: page.lead || "",
+          tags: Array.isArray(page.tags) && page.tags.length ? page.tags.slice(0, 4) : fallbackTags,
+          layout: page.layout || (index === 0 ? "Cover" : ""),
+          imageUrl: page.imageUrl || ""
+        }));
+      }
+
+      function renderTabs() {
+        slideTabs.innerHTML = "";
+        state.pages.forEach((page, index) => {
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = `slide-tab${index === state.selected ? " active" : ""}`;
+          tab.textContent = page.page || index + 1;
+          tab.addEventListener("click", () => {
+            state.selected = index;
+            goStep(state.step);
+          });
+          slideTabs.appendChild(tab);
+        });
+      }
+
+      function renderEditor() {
+        const page = currentPage();
+        pageEditor.hidden = !page;
+        pageEditorEmpty.style.display = page ? "none" : "block";
+        if (!page) return;
+        pageTitleInput.value = page.title;
+        pageLeadInput.value = page.lead;
+        document.querySelectorAll(".layout-card").forEach((card) => {
+          card.classList.toggle("active", card.dataset.layout === page.layout);
+        });
+      }
+
+      function renderExport() {
+        exportList.innerHTML = "";
+        exportEmpty.style.display = state.pages.length ? "none" : "block";
+        state.pages.forEach((page, index) => {
+          const row = document.createElement("button");
+          row.type = "button";
+          row.className = `page-row${index === state.selected ? " active" : ""}`;
+          row.innerHTML = `
+            <div class="page-num">${page.page || index + 1}</div>
+            <div><div class="page-title"></div><div class="page-meta"></div></div>
+            <div class="badge"></div>
+          `;
+          row.querySelector(".page-title").textContent = page.title;
+          row.querySelector(".page-meta").textContent = page.lead;
+          row.querySelector(".badge").textContent = page.imageUrl ? "已有圖" : "未產圖";
+          row.addEventListener("click", () => {
+            state.selected = index;
+            renderAll();
+          });
+          exportList.appendChild(row);
+        });
+      }
+
+      function renderPreview() {
+        const page = currentPage();
+        if (!page) {
+          previewHeading.textContent = "目前預覽";
+          previewNote.textContent = "先生成內容，這裡會顯示當前頁。";
+          slideImage.style.backgroundImage = "";
+          slideKicker.textContent = "TECH INSIDER";
+          slideTitle.textContent = "先把內容整理好，再處理設計";
+          slideLead.textContent = "這個工作台把資料處理、逐頁設計、配圖和輸出檢查拆開，避免文字與圖片互相打架。";
+          slideFooter.textContent = "Slide 1｜Draft";
+          fallbackTags.forEach((tag, index) => (captions[index].textContent = tag));
+          return;
+        }
+        previewHeading.textContent = `Slide ${page.page || state.selected + 1}`;
+        previewNote.textContent = page.layout ? `${page.layout} 版型` : "尚未選版型";
+        slideImage.style.backgroundImage = page.imageUrl ? `url("${page.imageUrl}")` : "";
+        slideKicker.textContent = `TECH INSIDER｜${page.layout || "未選版型"}`;
+        slideTitle.textContent = page.title;
+        slideLead.textContent = page.lead;
+        slideFooter.textContent = `Slide ${page.page || state.selected + 1}｜${page.layout || "Draft"}`;
+        const tags = page.tags.length ? page.tags : fallbackTags;
+        captions.forEach((caption, index) => (caption.textContent = tags[index] || fallbackTags[index]));
+      }
+
+      function renderAll() {
+        renderTabs();
+        renderEditor();
+        renderExport();
+        renderPreview();
+      }
+
+      document.querySelectorAll(".step").forEach((button) => {
+        button.addEventListener("click", () => goStep(button.dataset.step));
+      });
+
+      document.getElementById("go-pages").addEventListener("click", () => goStep("pages"));
+
       generateOutline.addEventListener("click", async () => {
-        const rawText = articleInput.value.trim();
-        generateOutline.textContent = "整理每頁內容中...";
+        const article = articleInput.value.trim();
         generateOutline.disabled = true;
+        generateOutline.textContent = "整理中...";
+        contentNotice.classList.remove("active");
         try {
           const data = await postJson("/api/generate-outline", {
-            article: rawText,
+            article,
             audience: audienceInput.value,
             pageCount: pageCountInput.value,
-            design: currentDesign
+            design: "editorial"
           });
-          if (data.outline?.pages?.length) {
-            renderDeckStrip(data.outline.pages);
-          } else {
-            renderDeckStrip([{ page: 1, layout: "Cover", title: data.outline.title, lead: data.outline.lead, tags: data.outline.captions }]);
-          }
+          const pages = data.outline?.pages?.length
+            ? data.outline.pages
+            : [{ page: 1, title: data.outline?.title || "簡報主張", lead: data.outline?.lead || article.slice(0, 120), tags: data.outline?.captions || fallbackTags }];
+          state.pages = normalizePages(pages);
+          state.selected = 0;
           if (!data.ok) {
-            previewDesc.textContent = `請先設定：${data.missingKeys.join("、")}`;
+            contentNotice.textContent = `缺少 API key：${(data.missingKeys || []).join(", ")}`;
+            contentNotice.classList.add("active");
           }
+          goStep("pages");
         } catch (error) {
-          previewTitle.textContent = "後端 API 尚未啟動";
-          previewDesc.textContent = "本機請用 npm run dev:app；線上請部署到支援 serverless functions 的平台並設定 secrets。";
-          slideKicker.textContent = "API 連線｜失敗";
-          slideTitle.textContent = "目前只有靜態前端，還不能呼叫三個 AI";
-          slideLead.textContent = error.message;
+          contentNotice.textContent = `整理失敗：${error.message}`;
+          contentNotice.classList.add("active");
         } finally {
-          generateOutline.textContent = "生成每頁內容";
           generateOutline.disabled = false;
+          generateOutline.textContent = "生成每頁內容";
         }
       });
 
-      generateImageStyle.addEventListener("click", async () => {
-        generateImageStyle.textContent = "產生風格中...";
-        generateImageStyle.disabled = true;
+      pageTitleInput.addEventListener("input", () => {
+        const page = currentPage();
+        if (!page) return;
+        page.title = pageTitleInput.value;
+        renderPreview();
+      });
+
+      pageLeadInput.addEventListener("input", () => {
+        const page = currentPage();
+        if (!page) return;
+        page.lead = pageLeadInput.value;
+        renderPreview();
+      });
+
+      layoutGrid.addEventListener("click", (event) => {
+        const card = event.target.closest(".layout-card");
+        const page = currentPage();
+        if (!card || !page) return;
+        page.layout = card.dataset.layout;
+        renderAll();
+      });
+
+      generatePageImage.addEventListener("click", async () => {
+        const page = currentPage();
+        if (!page) return;
+        imageNotice.classList.remove("active");
+        generatePageImage.disabled = true;
+        generatePageImage.textContent = "產圖中...";
         try {
-          const data = await postJson("/api/suggest-image-style", {
+          const data = await postJson("/api/generate-image", {
+            title: page.title,
+            lead: page.lead,
+            layout: page.layout,
             purpose: imagePurposeInput.value,
-            design: currentDesign,
-            hasReferenceImage
+            design: "editorial"
           });
-          referenceChip.classList.add("active");
-          referenceChip.textContent = data.ok ? "已取得無文字配圖風格" : "缺少 Gemini / OpenAI key";
-          previewDesc.textContent = data.ok
-            ? data.stylePrompt.slice(0, 120)
-            : `請先設定：${data.missingKeys.join("、")}`;
+          if (!data.ok || !data.imageDataUrl) throw new Error(data.error || "Image generation failed");
+          page.imageUrl = data.imageDataUrl;
+          renderAll();
         } catch (error) {
-          referenceChip.classList.add("active");
-          referenceChip.textContent = "配圖 API 尚未啟動";
-          previewDesc.textContent = "本機請用 npm run dev:app；線上請部署 serverless API 並設定 secrets。";
+          imageNotice.textContent = `產圖失敗：${error.message}`;
+          imageNotice.classList.add("active");
         } finally {
-          generateImageStyle.textContent = "產生無文字配圖風格";
-          generateImageStyle.disabled = false;
+          generatePageImage.disabled = false;
+          generatePageImage.textContent = "產生本頁配圖";
         }
       });
 
-      referenceInput.addEventListener("change", () => {
-        const file = referenceInput.files && referenceInput.files[0];
+      referenceImage.addEventListener("change", () => {
+        const file = referenceImage.files && referenceImage.files[0];
         if (!file) return;
-        hasReferenceImage = true;
-        const url = URL.createObjectURL(file);
-        referenceImagePreview.src = url;
-        referencePreview.classList.add("active");
-        referenceChip.classList.add("active");
+        state.referenceImage = true;
         uploadTitle.textContent = file.name;
-        uploadText.textContent = "已加入風格參考；系統只學習畫面氣氛與構圖，不使用圖片中的文字。";
+        uploadText.textContent = "已加入參考圖。產圖仍會要求不出現任何文字。";
       });
+
+      goStep("content");
     </script>
   </body>
 </html>
