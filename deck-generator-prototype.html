@@ -624,6 +624,18 @@
         height: 60%;
       }
 
+      .visual.generated {
+        border-radius: 18px;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 28px 72px rgba(16, 42, 58, 0.18);
+      }
+
+      .visual.generated > * {
+        display: none;
+      }
+
       .building {
         position: absolute;
         right: 0;
@@ -952,6 +964,20 @@
         opacity: 1;
       }
 
+      .mini-art.generated {
+        opacity: 1;
+        border-radius: 14px;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 12px 30px rgba(16, 42, 58, 0.15);
+      }
+
+      .mini-art.generated::before,
+      .mini-art.generated::after {
+        display: none;
+      }
+
       @media (max-width: 1200px) {
         .intent-strip {
           grid-template-columns: 1fr;
@@ -1112,7 +1138,7 @@
               <p class="slide-lead" id="slide-lead">模型先整理長文，產出每頁主張；圖片模型只生成右側場景。最後由 OpenSlide 把文字、標籤、頁碼與主視覺融合成同一頁。</p>
             </div>
 
-            <div class="visual">
+            <div class="visual" id="main-visual">
               <div class="building"></div>
               <div class="people"></div>
               <div class="arrow"></div>
@@ -1172,6 +1198,7 @@
       const slideTitle = document.getElementById("slide-title");
       const slideLead = document.getElementById("slide-lead");
       const slideFooter = document.getElementById("slide-footer");
+      const mainVisual = document.getElementById("main-visual");
       const deckStrip = document.getElementById("deck-strip");
       const deckOutput = document.getElementById("deck-output");
       const generateOutline = document.getElementById("generate-outline");
@@ -1229,6 +1256,13 @@
         captions.forEach((caption, tagIndex) => {
           caption.textContent = tags[tagIndex] || ["主張", "重點", "版型", "預覽"][tagIndex];
         });
+        if (page.imageUrl) {
+          mainVisual.classList.add("generated");
+          mainVisual.style.backgroundImage = `url("${page.imageUrl}")`;
+        } else {
+          mainVisual.classList.remove("generated");
+          mainVisual.style.backgroundImage = "";
+        }
         [...deckStrip.querySelectorAll(".deck-card")].forEach((card, cardIndex) => {
           card.classList.toggle("active", cardIndex === index);
         });
@@ -1303,12 +1337,19 @@
             event.stopPropagation();
             imageButton.textContent = "配圖中...";
             try {
-              await postJson("/api/suggest-image-style", {
+              const data = await postJson("/api/generate-image", {
+                title: page.title || "",
+                lead: page.lead || "",
+                layout: page.layout || "",
                 purpose: imagePurposeInput.value,
-                design: currentDesign,
-                hasReferenceImage
+                design: currentDesign
               });
+              if (!data.ok || !data.imageDataUrl) throw new Error(data.error || "Image generation failed");
+              page.imageUrl = data.imageDataUrl;
               mini.classList.add("has-image");
+              const miniArt = mini.querySelector(".mini-art");
+              miniArt.classList.add("generated");
+              miniArt.style.backgroundImage = `url("${page.imageUrl}")`;
               page.hasImage = true;
               imageButton.textContent = "已產生配圖";
               renderMainPage(page, index);
