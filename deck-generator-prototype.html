@@ -806,6 +806,118 @@
         font-weight: 800;
       }
 
+      .deck-output {
+        display: none;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .deck-output.active {
+        display: grid;
+      }
+
+      .mini-slide {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border-radius: 12px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        background: var(--cream);
+        box-shadow: 0 18px 46px rgba(16, 42, 58, 0.11);
+        cursor: pointer;
+      }
+
+      .mini-slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.94) 47%, rgba(251, 250, 244, 0.12) 75%),
+          radial-gradient(circle at 78% 42%, rgba(189, 232, 245, 0.76), transparent 34%);
+      }
+
+      .mini-copy {
+        position: absolute;
+        z-index: 2;
+        left: 7%;
+        top: 11%;
+        width: 50%;
+      }
+
+      .mini-kicker {
+        color: var(--royal);
+        font-size: 10px;
+        font-weight: 900;
+        margin-bottom: 14px;
+      }
+
+      .mini-title {
+        color: var(--navy);
+        font-size: 17px;
+        line-height: 1.22;
+        font-weight: 900;
+      }
+
+      .mini-lead {
+        margin-top: 9px;
+        color: var(--slate);
+        font-size: 10px;
+        line-height: 1.45;
+      }
+
+      .mini-art {
+        position: absolute;
+        z-index: 1;
+        right: 7%;
+        top: 17%;
+        width: 34%;
+        height: 48%;
+      }
+
+      .mini-art::before,
+      .mini-art::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+      }
+
+      .mini-art::before {
+        inset: 8% 0 auto auto;
+        width: 70%;
+        height: 70%;
+        background: linear-gradient(135deg, rgba(73, 136, 196, 0.95), rgba(189, 232, 245, 0.58));
+      }
+
+      .mini-art::after {
+        left: 0;
+        bottom: 0;
+        width: 56%;
+        height: 28%;
+        background: rgba(201, 139, 66, 0.65);
+      }
+
+      .mini-tags {
+        position: absolute;
+        z-index: 2;
+        left: 7%;
+        right: 7%;
+        bottom: 8%;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .mini-tag {
+        padding: 5px 7px;
+        border-radius: 7px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--royal);
+        font-size: 9px;
+        font-weight: 900;
+      }
+
       @media (max-width: 1200px) {
         .intent-strip {
           grid-template-columns: 1fr;
@@ -832,6 +944,10 @@
         }
 
         .deck-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .deck-output {
           grid-template-columns: 1fr;
         }
       }
@@ -978,6 +1094,8 @@
             <div class="reference-chip" id="reference-chip">已加入範例圖風格參考</div>
             <div class="footer" id="slide-footer">Slide 1｜封面</div>
           </div>
+
+          <div class="deck-output" id="deck-output" aria-label="complete generated deck"></div>
         </section>
       </div>
     </div>
@@ -1021,6 +1139,7 @@
       const slideLead = document.getElementById("slide-lead");
       const slideFooter = document.getElementById("slide-footer");
       const deckStrip = document.getElementById("deck-strip");
+      const deckOutput = document.getElementById("deck-output");
       const generateOutline = document.getElementById("generate-outline");
       const generateImageStyle = document.getElementById("generate-image-style");
       const articleInput = document.querySelector("textarea");
@@ -1084,7 +1203,9 @@
       function renderDeckStrip(pages) {
         generatedPages = pages || [];
         deckStrip.innerHTML = "";
+        deckOutput.innerHTML = "";
         deckStrip.classList.toggle("active", generatedPages.length > 0);
+        deckOutput.classList.toggle("active", generatedPages.length > 0);
         generatedPages.forEach((page, index) => {
           const card = document.createElement("button");
           card.type = "button";
@@ -1098,6 +1219,32 @@
           card.querySelector(".deck-card-layout").textContent = page.layout || "Draft";
           card.addEventListener("click", () => renderMainPage(page, index));
           deckStrip.appendChild(card);
+
+          const mini = document.createElement("button");
+          mini.type = "button";
+          mini.className = "mini-slide";
+          const tags = Array.isArray(page.tags) && page.tags.length ? page.tags : ["主張", "重點", "版型"];
+          mini.innerHTML = `
+            <div class="mini-copy">
+              <div class="mini-kicker"></div>
+              <div class="mini-title"></div>
+              <div class="mini-lead"></div>
+            </div>
+            <div class="mini-art" aria-hidden="true"></div>
+            <div class="mini-tags"></div>
+          `;
+          mini.querySelector(".mini-kicker").textContent = `Slide ${page.page || index + 1}｜${page.layout || "Draft"}`;
+          mini.querySelector(".mini-title").textContent = page.title || `第 ${index + 1} 頁`;
+          mini.querySelector(".mini-lead").textContent = page.lead || "";
+          const tagWrap = mini.querySelector(".mini-tags");
+          tags.slice(0, 4).forEach((tag) => {
+            const chip = document.createElement("span");
+            chip.className = "mini-tag";
+            chip.textContent = tag;
+            tagWrap.appendChild(chip);
+          });
+          mini.addEventListener("click", () => renderMainPage(page, index));
+          deckOutput.appendChild(mini);
         });
         renderMainPage(generatedPages[0], 0);
       }
