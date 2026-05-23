@@ -1,6 +1,6 @@
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-latest";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 export function json(res, status, body) {
   res.statusCode = status;

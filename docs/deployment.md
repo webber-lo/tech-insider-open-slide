@@ -8,9 +8,9 @@ For working AI calls, deploy to a serverless host such as Vercel and set these e
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 GEMINI_API_KEY=
-OPENAI_MODEL=gpt-4o-mini
-ANTHROPIC_MODEL=claude-3-5-sonnet-latest
-GEMINI_MODEL=gemini-1.5-flash
+OPENAI_MODEL=gpt-4.1-mini
+ANTHROPIC_MODEL=claude-sonnet-4-20250514
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 The frontend calls:
