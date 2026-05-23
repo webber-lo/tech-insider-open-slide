@@ -819,13 +819,14 @@
 
       .mini-slide {
         position: relative;
-        aspect-ratio: 16 / 9;
+        min-height: 260px;
         overflow: hidden;
         border-radius: 12px;
         border: 1px solid rgba(207, 224, 234, 0.95);
         background: var(--cream);
         box-shadow: 0 18px 46px rgba(16, 42, 58, 0.11);
         cursor: pointer;
+        text-align: left;
       }
 
       .mini-slide::before {
@@ -842,7 +843,7 @@
         z-index: 2;
         left: 7%;
         top: 11%;
-        width: 50%;
+        width: 58%;
       }
 
       .mini-kicker {
@@ -873,6 +874,7 @@
         top: 17%;
         width: 34%;
         height: 48%;
+        opacity: 0.24;
       }
 
       .mini-art::before,
@@ -902,7 +904,7 @@
         z-index: 2;
         left: 7%;
         right: 7%;
-        bottom: 8%;
+        bottom: 25%;
         display: flex;
         gap: 6px;
         flex-wrap: wrap;
@@ -916,6 +918,38 @@
         color: var(--royal);
         font-size: 9px;
         font-weight: 900;
+      }
+
+      .page-actions {
+        position: absolute;
+        z-index: 3;
+        left: 7%;
+        right: 7%;
+        bottom: 7%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .page-actions select,
+      .page-actions button {
+        height: 34px;
+        border-radius: 8px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--navy);
+        font-size: 11px;
+        font-weight: 900;
+        padding: 0 8px;
+      }
+
+      .page-actions button {
+        background: var(--royal);
+        color: var(--white);
+      }
+
+      .mini-slide.has-image .mini-art {
+        opacity: 1;
       }
 
       @media (max-width: 1200px) {
@@ -1010,15 +1044,15 @@
                 <select><option>6-8 頁</option><option>10-12 頁</option><option>3 頁摘要</option></select>
               </div>
             </div>
-            <button class="button" id="generate-outline" type="button">生成簡報大綱</button>
+            <button class="button" id="generate-outline" type="button">生成每頁內容</button>
           </div>
         </section>
 
         <section class="panel">
           <div class="panel-head">
             <div class="eyebrow">Direction</div>
-            <h2>由 Open Design 建議版型</h2>
-            <p class="desc">使用者不用先懂版型；系統依內容目的，從 Open Design 的方向與 layout catalog 推薦。</p>
+            <h2>內容出來後，再逐頁選版型與配圖</h2>
+            <p class="desc">先不要急著套版。等每頁主張確認後，再讓 Open Design 協助每頁挑 layout。</p>
           </div>
           <div class="panel-body">
             <div class="field">
@@ -1185,12 +1219,12 @@
 
       function renderMainPage(page, index) {
         if (!page) return;
-        previewTitle.textContent = `已生成：${generatedPages.length || 1} 頁簡報草稿`;
-        previewDesc.textContent = "點選下方任一頁，可在這裡切換完整預覽；這些頁面接下來可以轉成 OpenSlide SDD。";
-        slideKicker.textContent = `Page ${page.page || index + 1}｜${page.layout || "Slide"}`;
+        previewTitle.textContent = `資料整理完成：${generatedPages.length || 1} 頁內容`;
+        previewDesc.textContent = "先確認每頁內容，再在每一頁卡片上選版型、產生無文字配圖。";
+        slideKicker.textContent = `Page ${page.page || index + 1}｜${page.layout || "尚未選版型"}`;
         slideTitle.textContent = page.title || `第 ${index + 1} 頁`;
         slideLead.textContent = page.lead || "";
-        slideFooter.textContent = `Slide ${page.page || index + 1}｜${page.layout || "Draft"}`;
+        slideFooter.textContent = `Slide ${page.page || index + 1}｜${page.layout || "內容草稿"}`;
         const tags = Array.isArray(page.tags) && page.tags.length ? page.tags : ["主張", "重點", "版型", "預覽"];
         captions.forEach((caption, tagIndex) => {
           caption.textContent = tags[tagIndex] || ["主張", "重點", "版型", "預覽"][tagIndex];
@@ -1216,7 +1250,7 @@
             <div class="deck-card-layout"></div>
           `;
           card.querySelector(".deck-card-title").textContent = page.title || `第 ${index + 1} 頁`;
-          card.querySelector(".deck-card-layout").textContent = page.layout || "Draft";
+          card.querySelector(".deck-card-layout").textContent = page.layout || "尚未選版型";
           card.addEventListener("click", () => renderMainPage(page, index));
           deckStrip.appendChild(card);
 
@@ -1232,8 +1266,20 @@
             </div>
             <div class="mini-art" aria-hidden="true"></div>
             <div class="mini-tags"></div>
+            <div class="page-actions">
+              <select aria-label="選擇本頁版型">
+                <option value="">選本頁版型</option>
+                <option>Cover</option>
+                <option>Problem</option>
+                <option>Matrix</option>
+                <option>Timeline</option>
+                <option>Comparison</option>
+                <option>Closing</option>
+              </select>
+              <button type="button">產生本頁配圖</button>
+            </div>
           `;
-          mini.querySelector(".mini-kicker").textContent = `Slide ${page.page || index + 1}｜${page.layout || "Draft"}`;
+          mini.querySelector(".mini-kicker").textContent = `Slide ${page.page || index + 1}｜內容草稿`;
           mini.querySelector(".mini-title").textContent = page.title || `第 ${index + 1} 頁`;
           mini.querySelector(".mini-lead").textContent = page.lead || "";
           const tagWrap = mini.querySelector(".mini-tags");
@@ -1244,6 +1290,32 @@
             tagWrap.appendChild(chip);
           });
           mini.addEventListener("click", () => renderMainPage(page, index));
+          const layoutSelect = mini.querySelector("select");
+          const imageButton = mini.querySelector("button");
+          layoutSelect.addEventListener("click", (event) => event.stopPropagation());
+          layoutSelect.addEventListener("change", (event) => {
+            page.layout = event.target.value;
+            mini.querySelector(".mini-kicker").textContent = `Slide ${page.page || index + 1}｜${page.layout || "內容草稿"}`;
+            card.querySelector(".deck-card-layout").textContent = page.layout || "尚未選版型";
+            renderMainPage(page, index);
+          });
+          imageButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            imageButton.textContent = "配圖中...";
+            try {
+              await postJson("/api/suggest-image-style", {
+                purpose: imagePurposeInput.value,
+                design: currentDesign,
+                hasReferenceImage
+              });
+              mini.classList.add("has-image");
+              page.hasImage = true;
+              imageButton.textContent = "已產生配圖";
+              renderMainPage(page, index);
+            } catch {
+              imageButton.textContent = "配圖失敗";
+            }
+          });
           deckOutput.appendChild(mini);
         });
         renderMainPage(generatedPages[0], 0);
@@ -1271,7 +1343,7 @@
 
       generateOutline.addEventListener("click", async () => {
         const rawText = articleInput.value.trim();
-        generateOutline.textContent = "三模型整理中...";
+        generateOutline.textContent = "整理每頁內容中...";
         generateOutline.disabled = true;
         try {
           const data = await postJson("/api/generate-outline", {
@@ -1295,7 +1367,7 @@
           slideTitle.textContent = "目前只有靜態前端，還不能呼叫三個 AI";
           slideLead.textContent = error.message;
         } finally {
-          generateOutline.textContent = "生成簡報大綱";
+          generateOutline.textContent = "生成每頁內容";
           generateOutline.disabled = false;
         }
       });

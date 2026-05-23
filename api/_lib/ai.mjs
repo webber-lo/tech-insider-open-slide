@@ -95,45 +95,45 @@ export function fallbackOutline(article) {
   const pages = [
     {
       page: 1,
-      layout: "Cover",
+      layout: "",
       title: compact ? "把長文整理成一個清楚的開場主張" : "請貼上文章，生成第一頁主張",
       lead: compact ? `來源重點：${summary}` : seed,
-      tags: ["原文", "主張", "版型", "預覽"]
+      tags: ["原文", "主張", "重點", "順序"]
     },
     {
       page: 2,
-      layout: "Problem",
+      layout: "",
       title: "為什麼這件事現在重要？",
       lead: "整理事件背景、產業變化與使用者需要理解的主要矛盾。",
-      tags: ["背景", "變化", "問題"]
+      tags: ["背景", "變化", "問題", "脈絡"]
     },
     {
       page: 3,
-      layout: "Matrix",
+      layout: "",
       title: "影響會落在哪些角色身上？",
-      lead: "把利害關係人、平台、企業與內容團隊的影響拆成矩陣。",
-      tags: ["角色", "影響", "矩陣"]
+      lead: "把利害關係人、平台、企業與內容團隊的影響拆成可理解的段落。",
+      tags: ["角色", "影響", "利害關係", "決策"]
     },
     {
       page: 4,
-      layout: "Timeline",
+      layout: "",
       title: "接下來可能怎麼演變？",
-      lead: "用時間軸整理短期反應、中期調整與長期結構變化。",
-      tags: ["短期", "中期", "長期"]
+      lead: "整理短期反應、中期調整與長期結構變化。",
+      tags: ["短期", "中期", "長期", "變化"]
     },
     {
       page: 5,
-      layout: "Comparison",
+      layout: "",
       title: "不同做法的取捨是什麼？",
       lead: "比較傳統做法、AI 協作流程與 OpenSlide SDD 的差異。",
-      tags: ["傳統", "AI", "SDD"]
+      tags: ["傳統", "AI", "SDD", "取捨"]
     },
     {
       page: 6,
-      layout: "Closing",
+      layout: "",
       title: "最後要留下哪個判斷？",
       lead: "收斂成一個清楚的商業科技觀點，作為簡報結論。",
-      tags: ["判斷", "結論", "下一步"]
+      tags: ["判斷", "結論", "下一步", "觀點"]
     }
   ];
   return {

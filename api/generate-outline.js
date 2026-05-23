@@ -6,14 +6,15 @@ export default async function handler(req, res) {
   const { article = "", audience = "", pageCount = "", design = "" } = await readJsonBody(req);
   const prompt = [
     "你是 TECH INSIDER 的簡報編輯系統。",
-    "請把使用者提供的長文整理成一份 6 頁簡報草稿，回覆繁體中文。",
-    "每頁都要有：page, layout, title, lead, tags。",
-    "layout 只能選 Cover, Problem, Matrix, Timeline, Comparison, Closing。",
+    "請把使用者提供的長文整理成一份 6 頁簡報內容草稿，回覆繁體中文。",
+    "這一步只做資料處理，不要替使用者選版型，不要生圖。",
+    "每頁都要有：page, title, lead, tags。",
+    "tags 是本頁重點，不是視覺版型。",
     "請優先輸出 JSON，不要輸出 HTML。",
     "不要產生圖片文字，不要產生 HTML。",
     `受眾：${audience}`,
     `頁數：${pageCount}`,
-    `設計方向：${design}`,
+    `目前設計方向僅供語氣參考，不能決定版型：${design}`,
     `文章：${article}`
   ].join("\n\n");
 
@@ -76,7 +77,7 @@ function normalizePages(pages) {
   if (!Array.isArray(pages)) return [];
   return pages.slice(0, 8).map((page, index) => ({
     page: Number(page.page || index + 1),
-    layout: String(page.layout || inferLayout(index)),
+    layout: String(page.layout || ""),
     title: String(page.title || page.slideTitle || `第 ${index + 1} 頁`).slice(0, 44),
     lead: String(page.lead || page.summary || page.body || "").slice(0, 180),
     tags: Array.isArray(page.tags) ? page.tags.slice(0, 4).map(String) : ["主張", "重點", "版型"]
