@@ -523,6 +523,18 @@
           radial-gradient(circle at 72% 34%, rgba(189, 232, 245, 0.75), transparent 34%);
       }
 
+      .slide.has-generated-image::before {
+        background:
+          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.98) 42%, rgba(251, 250, 244, 0.74) 56%, rgba(251, 250, 244, 0.18) 78%, rgba(251, 250, 244, 0) 100%),
+          linear-gradient(0deg, rgba(251, 250, 244, 0.92) 0%, rgba(251, 250, 244, 0) 24%);
+      }
+
+      .slide.utility.has-generated-image::before {
+        background:
+          linear-gradient(90deg, rgba(15, 40, 84, 0.98) 0%, rgba(15, 40, 84, 0.95) 38%, rgba(15, 40, 84, 0.62) 54%, rgba(15, 40, 84, 0.12) 78%, rgba(15, 40, 84, 0) 100%),
+          linear-gradient(0deg, rgba(15, 40, 84, 0.78) 0%, rgba(15, 40, 84, 0) 24%);
+      }
+
       .slide.utility .slide-kicker,
       .slide.utility .slide-title {
         color: var(--white);
@@ -545,6 +557,12 @@
         background:
           linear-gradient(90deg, rgba(15, 40, 84, 0.2), rgba(15, 40, 84, 0.85)),
           radial-gradient(circle at 24% 38%, rgba(189, 232, 245, 0.35), transparent 30%);
+      }
+
+      .slide.magazine.has-generated-image::before {
+        background:
+          linear-gradient(90deg, rgba(15, 40, 84, 0.96) 0%, rgba(15, 40, 84, 0.9) 42%, rgba(15, 40, 84, 0.58) 58%, rgba(15, 40, 84, 0.16) 82%, rgba(15, 40, 84, 0) 100%),
+          linear-gradient(0deg, rgba(15, 40, 84, 0.82) 0%, rgba(15, 40, 84, 0) 25%);
       }
 
       .slide.magazine .slide-copy {
@@ -625,11 +643,16 @@
       }
 
       .visual.generated {
-        border-radius: 18px;
+        z-index: 0;
+        right: 0;
+        top: 0;
+        width: 64%;
+        height: 100%;
+        border-radius: 0;
         overflow: hidden;
         background-size: cover;
         background-position: center;
-        box-shadow: 0 28px 72px rgba(16, 42, 58, 0.18);
+        box-shadow: none;
       }
 
       .visual.generated > * {
@@ -1257,9 +1280,11 @@
           caption.textContent = tags[tagIndex] || ["主張", "重點", "版型", "預覽"][tagIndex];
         });
         if (page.imageUrl) {
+          slide.classList.add("has-generated-image");
           mainVisual.classList.add("generated");
           mainVisual.style.backgroundImage = `url("${page.imageUrl}")`;
         } else {
+          slide.classList.remove("has-generated-image");
           mainVisual.classList.remove("generated");
           mainVisual.style.backgroundImage = "";
         }
