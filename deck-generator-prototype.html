@@ -281,6 +281,26 @@
         opacity: 0.62;
       }
 
+      .action-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .action-row.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .small-button {
+        height: 38px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 10px;
+        color: var(--royal);
+        background: rgba(255, 255, 255, 0.86);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
       .page-list {
         display: grid;
         gap: 10px;
@@ -663,6 +683,7 @@
                 <div class="field">
                   <label for="page-count-input">頁數</label>
                   <select id="page-count-input">
+                    <option>12 頁</option>
                     <option>6-8 頁</option>
                     <option>3 頁提案</option>
                     <option>10-12 頁</option>
@@ -677,6 +698,10 @@
               <div id="page-editor-empty" class="empty">請先在第一步生成每頁內容。生成後，這裡會出現逐頁編輯工具。</div>
               <div id="page-editor" hidden>
                 <div class="editor-card">
+                  <div class="action-row" style="margin-bottom: 14px">
+                    <button class="small-button" id="move-page-up" type="button">上移一頁</button>
+                    <button class="small-button" id="move-page-down" type="button">下移一頁</button>
+                  </div>
                   <div class="field">
                     <label for="page-title-input">本頁標題</label>
                     <input id="page-title-input" />
@@ -685,6 +710,16 @@
                     <label for="page-lead-input">本頁主張</label>
                     <textarea class="mini-input" id="page-lead-input"></textarea>
                   </div>
+                  <div class="field">
+                    <label for="page-tags-input">底部小區塊</label>
+                    <input id="page-tags-input" placeholder="用頓號或逗號分隔，例如：市場、角色、風險、下一步" />
+                  </div>
+                  <div class="action-row three">
+                    <button class="small-button" data-ai-action="sharpen" type="button">AI 強化主張</button>
+                    <button class="small-button" data-ai-action="shorten" type="button">AI 精簡文字</button>
+                    <button class="small-button" data-ai-action="tags" type="button">AI 建議小區塊</button>
+                  </div>
+                  <p class="notice" id="edit-notice"></p>
                 </div>
 
                 <div class="editor-card">
@@ -793,6 +828,10 @@
       const pageEditorEmpty = document.getElementById("page-editor-empty");
       const pageTitleInput = document.getElementById("page-title-input");
       const pageLeadInput = document.getElementById("page-lead-input");
+      const pageTagsInput = document.getElementById("page-tags-input");
+      const editNotice = document.getElementById("edit-notice");
+      const movePageUp = document.getElementById("move-page-up");
+      const movePageDown = document.getElementById("move-page-down");
       const layoutGrid = document.getElementById("layout-grid");
       const slideTabs = document.getElementById("slide-tabs");
       const exportList = document.getElementById("export-list");
@@ -849,13 +888,23 @@
 
       function normalizePages(pages) {
         return pages.map((page, index) => ({
-          page: page.page || index + 1,
+          page: index + 1,
           title: page.title || `第 ${index + 1} 頁`,
           lead: page.lead || "",
-          tags: Array.isArray(page.tags) && page.tags.length ? page.tags.slice(0, 4) : fallbackTags,
+          tags: Array.isArray(page.tags) && page.tags.length ? page.tags.slice(0, 4) : [],
           layout: page.layout || (index === 0 ? "Cover" : ""),
           imageUrl: page.imageUrl || ""
         }));
+      }
+
+      function renumberPages() {
+        state.pages.forEach((page, index) => {
+          page.page = index + 1;
+        });
+      }
+
+      function parseTags(value) {
+        return value.split(/[、,，]/).map((item) => item.trim()).filter(Boolean).slice(0, 4);
       }
 
       function renderTabs() {
@@ -880,6 +929,9 @@
         if (!page) return;
         pageTitleInput.value = page.title;
         pageLeadInput.value = page.lead;
+        pageTagsInput.value = (page.tags || []).join("、");
+        movePageUp.disabled = state.selected === 0;
+        movePageDown.disabled = state.selected === state.pages.length - 1;
         document.querySelectorAll(".layout-card").forEach((card) => {
           card.classList.toggle("active", card.dataset.layout === page.layout);
         });
@@ -928,8 +980,8 @@
         slideTitle.textContent = page.title;
         slideLead.textContent = page.lead;
         slideFooter.textContent = `Slide ${page.page || state.selected + 1}｜${page.layout || "Draft"}`;
-        const tags = page.tags.length ? page.tags : fallbackTags;
-        captions.forEach((caption, index) => (caption.textContent = tags[index] || fallbackTags[index]));
+        const tags = page.tags.length ? page.tags : ["", "", "", ""];
+        captions.forEach((caption, index) => (caption.textContent = tags[index] || ""));
       }
 
       function renderAll() {
@@ -988,6 +1040,65 @@
         if (!page) return;
         page.lead = pageLeadInput.value;
         renderPreview();
+      });
+
+      pageTagsInput.addEventListener("input", () => {
+        const page = currentPage();
+        if (!page) return;
+        page.tags = parseTags(pageTagsInput.value);
+        renderPreview();
+      });
+
+      movePageUp.addEventListener("click", () => {
+        if (state.selected <= 0) return;
+        const current = state.pages[state.selected];
+        state.pages[state.selected] = state.pages[state.selected - 1];
+        state.pages[state.selected - 1] = current;
+        state.selected -= 1;
+        renumberPages();
+        renderAll();
+      });
+
+      movePageDown.addEventListener("click", () => {
+        if (state.selected >= state.pages.length - 1) return;
+        const current = state.pages[state.selected];
+        state.pages[state.selected] = state.pages[state.selected + 1];
+        state.pages[state.selected + 1] = current;
+        state.selected += 1;
+        renumberPages();
+        renderAll();
+      });
+
+      document.querySelectorAll("[data-ai-action]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const page = currentPage();
+          if (!page) return;
+          editNotice.classList.remove("active");
+          button.disabled = true;
+          const originalText = button.textContent;
+          button.textContent = "AI 處理中...";
+          try {
+            const data = await postJson("/api/refine-page", {
+              action: button.dataset.aiAction,
+              page
+            });
+            if (!data.page) throw new Error(data.error || "No page returned");
+            page.title = data.page.title || page.title;
+            page.lead = data.page.lead || page.lead;
+            page.tags = Array.isArray(data.page.tags) && data.page.tags.length ? data.page.tags.slice(0, 4) : page.tags;
+            if (!data.ok) {
+              editNotice.textContent = `AI key 不完整，已使用本機備援：${(data.missingKeys || []).join(", ")}`;
+              editNotice.classList.add("active");
+            }
+            renderAll();
+          } catch (error) {
+            editNotice.textContent = `AI 輔助失敗：${error.message}`;
+            editNotice.classList.add("active");
+          } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+        });
       });
 
       layoutGrid.addEventListener("click", (event) => {

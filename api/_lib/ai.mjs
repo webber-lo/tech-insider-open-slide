@@ -61,7 +61,7 @@ export async function callAnthropic(prompt) {
       },
       body: JSON.stringify({
         model: ANTHROPIC_MODEL,
-        max_tokens: 900,
+        max_tokens: 1800,
         messages: [{ role: "user", content: prompt }]
       })
     });
@@ -144,6 +144,16 @@ export function fallbackOutline(article) {
   };
 }
 
-export function buildFallbackPages(article) {
-  return fallbackOutline(article).pages;
+export function buildFallbackPages(article, targetPages = 6) {
+  const pages = fallbackOutline(article).pages;
+  const fitted = pages.slice(0, targetPages);
+  while (fitted.length < targetPages) {
+    const previous = fitted.at(-1) || pages.at(-1);
+    fitted.push({
+      ...previous,
+      page: fitted.length + 1,
+      title: `${previous.title}：延伸重點`.slice(0, 44)
+    });
+  }
+  return fitted.map((page, index) => ({ ...page, page: index + 1, layout: "" }));
 }
