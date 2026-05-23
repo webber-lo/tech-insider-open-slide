@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TECH INSIDER Deck Workbench</title>
+    <title>TECH INSIDER Structure Workbench</title>
     <style>
       :root {
         --ink: #102a3a;
@@ -21,30 +21,19 @@
         --shadow: 0 22px 70px rgba(16, 42, 58, 0.12);
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
 
       body {
         margin: 0;
         min-height: 100vh;
         color: var(--ink);
         font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
-        background:
-          linear-gradient(90deg, rgba(247, 248, 240, 0.96), rgba(239, 246, 249, 0.96)),
-          var(--paper);
+        background: linear-gradient(90deg, rgba(247, 248, 240, 0.96), rgba(239, 246, 249, 0.96)), var(--paper);
       }
 
-      button,
-      textarea,
-      select,
-      input {
-        font: inherit;
-      }
-
-      button {
-        cursor: pointer;
-      }
+      button, textarea, select, input { font: inherit; }
+      button { cursor: pointer; }
+      h1, h2, h3, p { margin: 0; }
 
       .app {
         min-height: 100vh;
@@ -89,14 +78,12 @@
 
       .shell {
         display: grid;
-        grid-template-columns: 220px minmax(430px, 560px) minmax(560px, 1fr);
+        grid-template-columns: 220px minmax(430px, 600px) minmax(560px, 1fr);
         gap: 18px;
         padding: 20px;
       }
 
-      .rail,
-      .panel,
-      .preview-panel {
+      .rail, .panel, .preview-panel {
         border: 1px solid rgba(207, 224, 234, 0.95);
         background: rgba(255, 255, 255, 0.82);
         box-shadow: var(--shadow);
@@ -129,9 +116,7 @@
         color: var(--navy);
       }
 
-      .step.done .step-num {
-        background: var(--ok);
-      }
+      .step.done .step-num { background: var(--ok); }
 
       .step-num {
         width: 28px;
@@ -179,13 +164,6 @@
         text-transform: uppercase;
       }
 
-      h1,
-      h2,
-      h3,
-      p {
-        margin: 0;
-      }
-
       h1 {
         color: var(--navy);
         font-size: 26px;
@@ -205,17 +183,9 @@
         line-height: 1.65;
       }
 
-      .panel-body {
-        padding: 22px 26px 26px;
-      }
-
-      .screen {
-        display: none;
-      }
-
-      .screen.active {
-        display: block;
-      }
+      .panel-body { padding: 22px 26px 26px; }
+      .screen { display: none; }
+      .screen.active { display: block; }
 
       label {
         display: block;
@@ -225,9 +195,7 @@
         font-weight: 900;
       }
 
-      textarea,
-      select,
-      input {
+      textarea, select, input {
         width: 100%;
         border: 1px solid rgba(207, 224, 234, 0.95);
         border-radius: 12px;
@@ -236,14 +204,13 @@
       }
 
       textarea {
-        min-height: 330px;
+        min-height: 260px;
         padding: 16px;
         resize: vertical;
         line-height: 1.7;
       }
 
-      select,
-      input {
+      select, input {
         height: 42px;
         padding: 0 12px;
       }
@@ -254,9 +221,7 @@
         gap: 12px;
       }
 
-      .field {
-        margin-bottom: 18px;
-      }
+      .field { margin-bottom: 18px; }
 
       .button {
         width: 100%;
@@ -268,18 +233,9 @@
         font-weight: 900;
       }
 
-      .button.primary {
-        background: var(--amber);
-      }
-
-      .button.ghost {
-        color: var(--royal);
-        background: rgba(189, 232, 245, 0.36);
-      }
-
-      .button:disabled {
-        opacity: 0.62;
-      }
+      .button.primary { background: var(--amber); }
+      .button.ghost { color: var(--royal); background: rgba(189, 232, 245, 0.36); }
+      .button:disabled, .small-button:disabled { opacity: 0.55; cursor: default; }
 
       .action-row {
         display: grid;
@@ -287,9 +243,7 @@
         gap: 10px;
       }
 
-      .action-row.three {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
+      .action-row.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
       .small-button {
         height: 38px;
@@ -299,6 +253,73 @@
         background: rgba(255, 255, 255, 0.86);
         font-size: 12px;
         font-weight: 900;
+      }
+
+      .editor-card {
+        padding: 16px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 16px;
+        background: rgba(247, 248, 240, 0.58);
+      }
+
+      .editor-card + .editor-card { margin-top: 14px; }
+      .mini-input { min-height: 92px; }
+
+      .block-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .block-editor {
+        display: grid;
+        grid-template-columns: 120px 1fr 34px;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .block-editor input { height: 38px; }
+
+      .remove-block {
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 9px;
+        color: var(--muted);
+        background: rgba(207, 224, 234, 0.46);
+        font-weight: 900;
+      }
+
+      .layout-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .layout-card {
+        padding: 12px;
+        border: 1px solid rgba(207, 224, 234, 0.95);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--ink);
+        text-align: left;
+      }
+
+      .layout-card.active {
+        border-color: rgba(73, 136, 196, 0.95);
+        background: #eef8fb;
+      }
+
+      .layout-card strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--navy);
+        font-size: 13px;
+      }
+
+      .layout-card span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
       }
 
       .page-list {
@@ -347,6 +368,7 @@
         margin-top: 4px;
         color: var(--muted);
         font-size: 12px;
+        line-height: 1.45;
       }
 
       .badge {
@@ -356,94 +378,6 @@
         background: rgba(189, 232, 245, 0.42);
         font-size: 11px;
         font-weight: 900;
-      }
-
-      .editor-card {
-        padding: 16px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 16px;
-        background: rgba(247, 248, 240, 0.58);
-      }
-
-      .editor-card + .editor-card {
-        margin-top: 14px;
-      }
-
-      .mini-input {
-        min-height: 96px;
-      }
-
-      .layout-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .layout-card {
-        padding: 12px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.88);
-        color: var(--ink);
-        text-align: left;
-      }
-
-      .layout-card.active {
-        border-color: rgba(73, 136, 196, 0.95);
-        background: #eef8fb;
-      }
-
-      .layout-card strong {
-        display: block;
-        margin-bottom: 4px;
-        color: var(--navy);
-        font-size: 13px;
-      }
-
-      .layout-card span {
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.4;
-      }
-
-      .upload-zone {
-        display: grid;
-        grid-template-columns: 44px 1fr;
-        gap: 12px;
-        align-items: center;
-        padding: 14px;
-        border: 1px dashed rgba(73, 136, 196, 0.66);
-        border-radius: 14px;
-        background: rgba(189, 232, 245, 0.22);
-      }
-
-      .upload-zone input {
-        display: none;
-      }
-
-      .upload-icon {
-        width: 42px;
-        height: 42px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        color: var(--royal);
-        background: var(--white);
-        font-size: 20px;
-        font-weight: 900;
-      }
-
-      .upload-title {
-        color: var(--navy);
-        font-size: 13px;
-        font-weight: 900;
-      }
-
-      .upload-text {
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.45;
       }
 
       .preview-panel {
@@ -502,10 +436,8 @@
 
       .slide-image {
         position: absolute;
-        inset: 0 0 0 42%;
-        background:
-          radial-gradient(circle at 45% 40%, rgba(73, 136, 196, 0.5), transparent 30%),
-          linear-gradient(135deg, rgba(189, 232, 245, 0.72), rgba(255, 255, 255, 0.06));
+        inset: 0 0 0 44%;
+        background: radial-gradient(circle at 45% 40%, rgba(73, 136, 196, 0.5), transparent 30%), linear-gradient(135deg, rgba(189, 232, 245, 0.72), rgba(255, 255, 255, 0.06));
         background-size: cover;
         background-position: center;
       }
@@ -515,24 +447,22 @@
         position: absolute;
         inset: 0;
         z-index: 1;
-        background:
-          linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.98) 42%, rgba(251, 250, 244, 0.74) 58%, rgba(251, 250, 244, 0.16) 82%, rgba(251, 250, 244, 0) 100%),
-          linear-gradient(0deg, rgba(251, 250, 244, 0.95), rgba(251, 250, 244, 0) 26%);
+        background: linear-gradient(90deg, rgba(251, 250, 244, 1) 0%, rgba(251, 250, 244, 0.98) 44%, rgba(251, 250, 244, 0.78) 61%, rgba(251, 250, 244, 0.18) 84%, rgba(251, 250, 244, 0) 100%);
       }
 
       .slide-copy {
         position: absolute;
         z-index: 2;
         left: 5.5%;
-        top: 8%;
-        width: 45%;
+        top: 7%;
+        width: 52%;
       }
 
       .slide-kicker {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 38px;
+        margin-bottom: 26px;
         color: var(--navy);
         font-size: 12px;
         font-weight: 900;
@@ -548,47 +478,49 @@
 
       .slide-title {
         color: var(--navy);
-        font-size: clamp(27px, 3.1vw, 48px);
+        font-size: clamp(24px, 2.8vw, 43px);
         font-weight: 900;
         line-height: 1.15;
       }
 
       .hairline {
-        width: 92%;
+        width: 82%;
         height: 2px;
-        margin: 20px 0 18px;
+        margin: 18px 0 16px;
         background: var(--line);
       }
 
-      .slide-lead {
+      .slide-claim {
         color: var(--muted);
-        font-size: clamp(13px, 1.1vw, 17px);
-        line-height: 1.72;
+        font-size: clamp(12px, 1vw, 16px);
+        line-height: 1.68;
       }
 
-      .caption-row {
-        position: absolute;
-        z-index: 2;
-        left: 5.5%;
-        right: 5.5%;
-        bottom: 7%;
+      .slide-blocks {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .slide-block {
+        display: grid;
+        grid-template-columns: 92px 1fr;
         gap: 10px;
+        padding: 8px 10px;
+        border: 1px solid rgba(207, 224, 234, 0.92);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.76);
+        font-size: 11px;
+        line-height: 1.45;
       }
 
-      .caption {
-        min-height: 42px;
-        display: grid;
-        place-items: center;
-        padding: 0 8px;
-        border: 1px solid rgba(207, 224, 234, 0.95);
-        border-radius: 10px;
+      .block-label {
         color: var(--royal);
-        background: rgba(255, 255, 255, 0.82);
-        font-size: 12px;
         font-weight: 900;
-        text-align: center;
+      }
+
+      .block-value {
+        color: var(--ink);
       }
 
       .footer {
@@ -619,57 +551,55 @@
         line-height: 1.55;
       }
 
-      .notice.active {
-        display: block;
-      }
+      .notice.active { display: block; }
 
       @media (max-width: 1260px) {
-        .shell {
-          grid-template-columns: 1fr;
-        }
-
-        .rail,
-        .preview-panel {
-          position: static;
-        }
+        .shell { grid-template-columns: 1fr; }
+        .rail, .preview-panel { position: static; }
       }
     </style>
   </head>
   <body>
     <div class="app">
       <header class="topbar">
-        <div class="brand"><div class="seal">TI</div><div>Deck Workbench</div></div>
-        <div class="status">內容先行，版型與配圖逐頁處理</div>
+        <div class="brand"><div class="seal">TI</div><div>Structure Workbench</div></div>
+        <div class="status">文字 -> 精華結構 -> 框架 -> 版面</div>
       </header>
 
       <main class="shell">
         <nav class="rail" aria-label="workflow">
           <button class="step active" data-step="content" type="button">
             <span class="step-num">1</span>
-            <span><span class="step-title">整理內容</span><span class="step-text">長文變成每頁主張</span></span>
+            <span><span class="step-title">理解文字</span><span class="step-text">先讀原文，不套框架</span></span>
           </button>
           <button class="step" data-step="pages" type="button">
             <span class="step-num">2</span>
-            <span><span class="step-title">逐頁編輯</span><span class="step-text">每頁選版型、改字、產圖</span></span>
+            <span><span class="step-title">精華結構</span><span class="step-text">保留原文有意義的欄位</span></span>
           </button>
           <button class="step" data-step="export" type="button">
             <span class="step-num">3</span>
-            <span><span class="step-title">確認輸出</span><span class="step-text">檢查整份 deck</span></span>
+            <span><span class="step-title">框架與版面</span><span class="step-text">依內容決定呈現方式</span></span>
           </button>
         </nav>
 
         <section class="panel">
           <div class="panel-head">
             <div class="eyebrow" id="panel-eyebrow">Step 1</div>
-            <h1 id="panel-title">先把長文整理成簡報內容</h1>
-            <p class="desc" id="panel-desc">這一步只處理資料：每頁標題、主張、重點。先不要選版型，也不要產圖。</p>
+            <h1 id="panel-title">從文字中提煉有意義的結構</h1>
+            <p class="desc" id="panel-desc">不再用固定小區塊，也不先套版型。先保留原文裡真正重要的欄位、段落、數字與限制。</p>
           </div>
 
           <div class="panel-body">
             <section class="screen active" id="screen-content">
               <div class="field">
                 <label for="article-input">文章或資料</label>
-                <textarea id="article-input">AI 正在改變內容產業。媒體需要先把長文整理成清楚的每頁主張，再依照每頁主張選擇版型與圖片。圖片不應包含任何文字；標題、內文、標籤與頁碼應該交給 OpenSlide 排版。好的簡報生成工具不該一開始就混合所有控制項，而應該把資料處理、逐頁設計、輸出檢查拆成清楚步驟。</textarea>
+                <textarea id="article-input">踢透 Tech Talk：動畫解釋科技事件
+單元定位：用動畫與視覺化解釋科技新聞背後的事件、關係、利益與下一步。
+主載體：YouTube
+更新頻率：每週兩次
+每集長度：5–8 分鐘
+固定結構：一個事件、一張關係圖、三個商業問題
+選題來源與合作：BI 外電、重大科技事件、海外授權內容</textarea>
               </div>
               <div class="row">
                 <div class="field">
@@ -690,12 +620,12 @@
                   </select>
                 </div>
               </div>
-              <button class="button primary" id="generate-outline" type="button">生成每頁內容</button>
+              <button class="button primary" id="generate-outline" type="button">提煉內容結構</button>
               <p class="notice" id="content-notice"></p>
             </section>
 
             <section class="screen" id="screen-pages">
-              <div id="page-editor-empty" class="empty">請先在第一步生成每頁內容。生成後，這裡會出現逐頁編輯工具。</div>
+              <div id="page-editor-empty" class="empty">請先在第一步提煉內容結構。生成後，這裡會出現逐頁編輯工具。</div>
               <div id="page-editor" hidden>
                 <div class="editor-card">
                   <div class="action-row" style="margin-bottom: 14px">
@@ -707,59 +637,47 @@
                     <input id="page-title-input" />
                   </div>
                   <div class="field">
-                    <label for="page-lead-input">本頁主張</label>
-                    <textarea class="mini-input" id="page-lead-input"></textarea>
+                    <label for="page-claim-input">本頁主張</label>
+                    <textarea class="mini-input" id="page-claim-input"></textarea>
                   </div>
                   <div class="field">
-                    <label for="page-tags-input">底部小區塊</label>
-                    <input id="page-tags-input" placeholder="用頓號或逗號分隔，例如：市場、角色、風險、下一步" />
+                    <label>內容結構 blocks</label>
+                    <div class="block-list" id="block-list"></div>
+                    <button class="small-button" id="add-block" type="button" style="margin-top: 10px; width: 100%">新增一個內容欄位</button>
                   </div>
                   <div class="action-row three">
                     <button class="small-button" data-ai-action="sharpen" type="button">AI 強化主張</button>
-                    <button class="small-button" data-ai-action="shorten" type="button">AI 精簡文字</button>
-                    <button class="small-button" data-ai-action="tags" type="button">AI 建議小區塊</button>
+                    <button class="small-button" data-ai-action="preserve" type="button">AI 保留細節</button>
+                    <button class="small-button" data-ai-action="layout" type="button">AI 建議框架</button>
                   </div>
                   <p class="notice" id="edit-notice"></p>
                 </div>
 
                 <div class="editor-card">
-                  <label>本頁版型</label>
+                  <label>本頁框架建議</label>
                   <div class="layout-grid" id="layout-grid">
-                    <button class="layout-card active" data-layout="Cover" type="button"><strong>Cover</strong><span>大標題加融合式主視覺</span></button>
-                    <button class="layout-card" data-layout="Matrix" type="button"><strong>Matrix</strong><span>比較角色、策略或條件</span></button>
-                    <button class="layout-card" data-layout="Timeline" type="button"><strong>Timeline</strong><span>事件順序與發展脈絡</span></button>
-                    <button class="layout-card" data-layout="Comparison" type="button"><strong>Comparison</strong><span>兩種觀點或方案對照</span></button>
+                    <button class="layout-card" data-layout="Narrative" type="button"><strong>Narrative</strong><span>一頁講清楚一個主張</span></button>
+                    <button class="layout-card" data-layout="List" type="button"><strong>List</strong><span>保留多個原文欄位</span></button>
+                    <button class="layout-card" data-layout="Matrix" type="button"><strong>Matrix</strong><span>比較角色、條件或策略</span></button>
+                    <button class="layout-card" data-layout="Timeline" type="button"><strong>Timeline</strong><span>呈現時間與發展脈絡</span></button>
+                    <button class="layout-card" data-layout="Process" type="button"><strong>Process</strong><span>呈現步驟、流程或工作法</span></button>
+                    <button class="layout-card" data-layout="Relationship" type="button"><strong>Relationship</strong><span>呈現事件、角色與利益關係</span></button>
                   </div>
                 </div>
 
                 <div class="editor-card">
                   <div class="field">
-                    <label for="image-purpose-input">配圖方向</label>
-                    <select id="image-purpose-input">
-                      <option>讓抽象議題變好懂</option>
-                      <option>呈現商業科技場景</option>
-                      <option>做成雜誌式主視覺</option>
-                      <option>用資料感與流程感表現</option>
-                    </select>
+                    <label for="image-brief-input">無文字配圖方向</label>
+                    <textarea class="mini-input" id="image-brief-input"></textarea>
                   </div>
-                  <label class="upload-zone" for="reference-image">
-                    <span class="upload-icon">+</span>
-                    <span>
-                      <span class="upload-title" id="upload-title">上傳參考圖片</span>
-                      <span class="upload-text" id="upload-text">只作為風格參考；產出的配圖仍不放任何文字。</span>
-                    </span>
-                    <input id="reference-image" type="file" accept="image/*" />
-                  </label>
-                  <div style="margin-top: 12px">
-                    <button class="button" id="generate-page-image" type="button">產生本頁配圖</button>
-                  </div>
+                  <button class="button" id="generate-page-image" type="button">產生本頁配圖</button>
                   <p class="notice" id="image-notice"></p>
                 </div>
               </div>
             </section>
 
             <section class="screen" id="screen-export">
-              <div id="export-empty" class="empty">還沒有內容可以輸出。請先生成每頁內容。</div>
+              <div id="export-empty" class="empty">還沒有內容可以輸出。請先提煉內容結構。</div>
               <div id="export-list" class="page-list"></div>
             </section>
           </div>
@@ -770,7 +688,7 @@
             <div>
               <div class="eyebrow">Artifact Preview</div>
               <h2 id="preview-heading">目前預覽</h2>
-              <p class="desc" id="preview-note">右側永遠只預覽當前頁，不把所有控制項塞在一起。</p>
+              <p class="desc" id="preview-note">右側只呈現當前頁：主張加保留下來的內容結構。</p>
             </div>
             <button class="button ghost" id="go-pages" type="button" style="width: 132px">逐頁編輯</button>
           </div>
@@ -779,17 +697,12 @@
             <div class="slide-image" id="slide-image" aria-hidden="true"></div>
             <div class="slide-copy">
               <div class="slide-kicker" id="slide-kicker">TECH INSIDER</div>
-              <div class="slide-title" id="slide-title">先把內容整理好，再處理設計</div>
+              <div class="slide-title" id="slide-title">先理解文字，再建立版面</div>
               <div class="hairline"></div>
-              <p class="slide-lead" id="slide-lead">這個工作台把資料處理、逐頁設計、配圖和輸出檢查拆開，避免文字與圖片互相打架。</p>
+              <p class="slide-claim" id="slide-claim">系統會先提煉原文裡真正重要的欄位與細節，再依內容選擇適合的框架。</p>
+              <div class="slide-blocks" id="slide-blocks"></div>
             </div>
-            <div class="caption-row">
-              <div class="caption" id="caption-1">內容</div>
-              <div class="caption" id="caption-2">版型</div>
-              <div class="caption" id="caption-3">配圖</div>
-              <div class="caption" id="caption-4">輸出</div>
-            </div>
-            <div class="footer" id="slide-footer">Slide 1｜Draft</div>
+            <div class="footer" id="slide-footer">Slide 1 | Draft</div>
           </div>
         </aside>
       </main>
@@ -799,17 +712,15 @@
       const state = {
         step: "content",
         selected: 0,
-        referenceImage: false,
         pages: []
       };
 
       const stepLabels = {
-        content: ["Step 1", "先把長文整理成簡報內容", "這一步只處理資料：每頁標題、主張、重點。先不要選版型，也不要產圖。"],
-        pages: ["Step 2", "逐頁編輯每張 slide", "一次只處理一頁：改字、選版型、產生本頁配圖。"],
-        export: ["Step 3", "確認整份簡報", "檢查每頁是否都有清楚主張、合適版型與必要配圖。"]
+        content: ["Step 1", "從文字中提煉有意義的結構", "不再先套版型。先保留原文裡真正重要的欄位、段落、數字與限制。"],
+        pages: ["Step 2", "逐頁確認精華結構", "每一頁都可以改主張、補 blocks，並讓 AI 重新保留細節。"],
+        export: ["Step 3", "依結構建立框架與版面", "確認每頁的內容結構、框架建議與配圖方向。"]
       };
 
-      const fallbackTags = ["主張", "重點", "版型", "配圖"];
       const screens = {
         content: document.getElementById("screen-content"),
         pages: document.getElementById("screen-pages"),
@@ -819,26 +730,24 @@
       const articleInput = document.getElementById("article-input");
       const audienceInput = document.getElementById("audience-input");
       const pageCountInput = document.getElementById("page-count-input");
-      const imagePurposeInput = document.getElementById("image-purpose-input");
       const generateOutline = document.getElementById("generate-outline");
       const generatePageImage = document.getElementById("generate-page-image");
       const contentNotice = document.getElementById("content-notice");
       const imageNotice = document.getElementById("image-notice");
+      const editNotice = document.getElementById("edit-notice");
       const pageEditor = document.getElementById("page-editor");
       const pageEditorEmpty = document.getElementById("page-editor-empty");
       const pageTitleInput = document.getElementById("page-title-input");
-      const pageLeadInput = document.getElementById("page-lead-input");
-      const pageTagsInput = document.getElementById("page-tags-input");
-      const editNotice = document.getElementById("edit-notice");
+      const pageClaimInput = document.getElementById("page-claim-input");
+      const imageBriefInput = document.getElementById("image-brief-input");
+      const blockList = document.getElementById("block-list");
+      const addBlock = document.getElementById("add-block");
       const movePageUp = document.getElementById("move-page-up");
       const movePageDown = document.getElementById("move-page-down");
       const layoutGrid = document.getElementById("layout-grid");
       const slideTabs = document.getElementById("slide-tabs");
       const exportList = document.getElementById("export-list");
       const exportEmpty = document.getElementById("export-empty");
-      const referenceImage = document.getElementById("reference-image");
-      const uploadTitle = document.getElementById("upload-title");
-      const uploadText = document.getElementById("upload-text");
 
       const panelEyebrow = document.getElementById("panel-eyebrow");
       const panelTitle = document.getElementById("panel-title");
@@ -848,14 +757,23 @@
       const slideImage = document.getElementById("slide-image");
       const slideKicker = document.getElementById("slide-kicker");
       const slideTitle = document.getElementById("slide-title");
-      const slideLead = document.getElementById("slide-lead");
+      const slideClaim = document.getElementById("slide-claim");
+      const slideBlocks = document.getElementById("slide-blocks");
       const slideFooter = document.getElementById("slide-footer");
-      const captions = [
-        document.getElementById("caption-1"),
-        document.getElementById("caption-2"),
-        document.getElementById("caption-3"),
-        document.getElementById("caption-4")
-      ];
+
+      function currentPage() {
+        return state.pages[state.selected];
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`API failed: ${response.status}`);
+        return response.json();
+      }
 
       function goStep(step) {
         state.step = step;
@@ -872,39 +790,31 @@
         renderAll();
       }
 
-      async function postJson(url, payload) {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error(`API failed: ${response.status}`);
-        return response.json();
-      }
-
-      function currentPage() {
-        return state.pages[state.selected];
-      }
-
       function normalizePages(pages) {
         return pages.map((page, index) => ({
           page: index + 1,
           title: page.title || `第 ${index + 1} 頁`,
-          lead: page.lead || "",
-          tags: Array.isArray(page.tags) && page.tags.length ? page.tags.slice(0, 4) : [],
-          layout: page.layout || (index === 0 ? "Cover" : ""),
+          claim: page.claim || page.lead || "",
+          blocks: normalizeBlocks(page.blocks || page.details || []),
+          layoutHint: page.layoutHint || page.layout || (index === 0 ? "Narrative" : "List"),
+          imageBrief: page.imageBrief || "",
           imageUrl: page.imageUrl || ""
         }));
+      }
+
+      function normalizeBlocks(blocks) {
+        return Array.isArray(blocks)
+          ? blocks.map((block) => ({
+              label: block.label || block.name || "重點",
+              value: block.value || block.text || block.content || ""
+            })).filter((block) => block.label && block.value).slice(0, 8)
+          : [];
       }
 
       function renumberPages() {
         state.pages.forEach((page, index) => {
           page.page = index + 1;
         });
-      }
-
-      function parseTags(value) {
-        return value.split(/[、,，]/).map((item) => item.trim()).filter(Boolean).slice(0, 4);
       }
 
       function renderTabs() {
@@ -916,9 +826,40 @@
           tab.textContent = page.page || index + 1;
           tab.addEventListener("click", () => {
             state.selected = index;
-            goStep(state.step);
+            renderAll();
           });
           slideTabs.appendChild(tab);
+        });
+      }
+
+      function renderBlockEditors() {
+        const page = currentPage();
+        blockList.innerHTML = "";
+        if (!page) return;
+        page.blocks.forEach((block, index) => {
+          const row = document.createElement("div");
+          row.className = "block-editor";
+          row.innerHTML = `
+            <input aria-label="block label" />
+            <input aria-label="block value" />
+            <button class="remove-block" type="button">x</button>
+          `;
+          const [labelInput, valueInput] = row.querySelectorAll("input");
+          labelInput.value = block.label;
+          valueInput.value = block.value;
+          labelInput.addEventListener("input", () => {
+            page.blocks[index].label = labelInput.value;
+            renderPreview();
+          });
+          valueInput.addEventListener("input", () => {
+            page.blocks[index].value = valueInput.value;
+            renderPreview();
+          });
+          row.querySelector("button").addEventListener("click", () => {
+            page.blocks.splice(index, 1);
+            renderAll();
+          });
+          blockList.appendChild(row);
         });
       }
 
@@ -928,13 +869,14 @@
         pageEditorEmpty.style.display = page ? "none" : "block";
         if (!page) return;
         pageTitleInput.value = page.title;
-        pageLeadInput.value = page.lead;
-        pageTagsInput.value = (page.tags || []).join("、");
+        pageClaimInput.value = page.claim;
+        imageBriefInput.value = page.imageBrief || "";
         movePageUp.disabled = state.selected === 0;
         movePageDown.disabled = state.selected === state.pages.length - 1;
         document.querySelectorAll(".layout-card").forEach((card) => {
-          card.classList.toggle("active", card.dataset.layout === page.layout);
+          card.classList.toggle("active", card.dataset.layout === page.layoutHint);
         });
+        renderBlockEditors();
       }
 
       function renderExport() {
@@ -950,8 +892,8 @@
             <div class="badge"></div>
           `;
           row.querySelector(".page-title").textContent = page.title;
-          row.querySelector(".page-meta").textContent = page.lead;
-          row.querySelector(".badge").textContent = page.imageUrl ? "已有圖" : "未產圖";
+          row.querySelector(".page-meta").textContent = page.blocks.map((block) => `${block.label}: ${block.value}`).join(" | ") || page.claim;
+          row.querySelector(".badge").textContent = page.layoutHint || "未選框架";
           row.addEventListener("click", () => {
             state.selected = index;
             renderAll();
@@ -964,24 +906,31 @@
         const page = currentPage();
         if (!page) {
           previewHeading.textContent = "目前預覽";
-          previewNote.textContent = "先生成內容，這裡會顯示當前頁。";
+          previewNote.textContent = "先提煉內容結構，這裡會顯示當前頁。";
           slideImage.style.backgroundImage = "";
-          slideKicker.textContent = "TECH INSIDER";
-          slideTitle.textContent = "先把內容整理好，再處理設計";
-          slideLead.textContent = "這個工作台把資料處理、逐頁設計、配圖和輸出檢查拆開，避免文字與圖片互相打架。";
-          slideFooter.textContent = "Slide 1｜Draft";
-          fallbackTags.forEach((tag, index) => (captions[index].textContent = tag));
+          slideKicker.textContent = "STRUCTURE FIRST";
+          slideTitle.textContent = "先理解文字，再建立版面";
+          slideClaim.textContent = "系統會先提煉原文裡真正重要的欄位與細節，再依內容選擇適合的框架。";
+          slideBlocks.innerHTML = "";
+          slideFooter.textContent = "Slide 1 | Draft";
           return;
         }
         previewHeading.textContent = `Slide ${page.page || state.selected + 1}`;
-        previewNote.textContent = page.layout ? `${page.layout} 版型` : "尚未選版型";
+        previewNote.textContent = page.layoutHint ? `${page.layoutHint} 框架` : "尚未選框架";
         slideImage.style.backgroundImage = page.imageUrl ? `url("${page.imageUrl}")` : "";
-        slideKicker.textContent = `TECH INSIDER｜${page.layout || "未選版型"}`;
+        slideKicker.textContent = `TECH INSIDER | ${page.layoutHint || "未選框架"}`;
         slideTitle.textContent = page.title;
-        slideLead.textContent = page.lead;
-        slideFooter.textContent = `Slide ${page.page || state.selected + 1}｜${page.layout || "Draft"}`;
-        const tags = page.tags.length ? page.tags : ["", "", "", ""];
-        captions.forEach((caption, index) => (caption.textContent = tags[index] || ""));
+        slideClaim.textContent = page.claim;
+        slideFooter.textContent = `Slide ${page.page || state.selected + 1} | ${page.layoutHint || "Draft"}`;
+        slideBlocks.innerHTML = "";
+        page.blocks.slice(0, 5).forEach((block) => {
+          const item = document.createElement("div");
+          item.className = "slide-block";
+          item.innerHTML = `<div class="block-label"></div><div class="block-value"></div>`;
+          item.querySelector(".block-label").textContent = block.label;
+          item.querySelector(".block-value").textContent = block.value;
+          slideBlocks.appendChild(item);
+        });
       }
 
       function renderAll() {
@@ -1000,31 +949,29 @@
       generateOutline.addEventListener("click", async () => {
         const article = articleInput.value.trim();
         generateOutline.disabled = true;
-        generateOutline.textContent = "整理中...";
+        generateOutline.textContent = "提煉中...";
         contentNotice.classList.remove("active");
         try {
           const data = await postJson("/api/generate-outline", {
             article,
             audience: audienceInput.value,
             pageCount: pageCountInput.value,
-            design: "editorial"
+            design: "structure-first"
           });
-          const pages = data.outline?.pages?.length
-            ? data.outline.pages
-            : [{ page: 1, title: data.outline?.title || "簡報主張", lead: data.outline?.lead || article.slice(0, 120), tags: data.outline?.captions || fallbackTags }];
-          state.pages = normalizePages(pages);
+          state.pages = normalizePages(data.outline?.pages?.length ? data.outline.pages : []);
           state.selected = 0;
+          if (!state.pages.length) throw new Error("No pages returned");
           if (!data.ok) {
             contentNotice.textContent = `缺少 API key：${(data.missingKeys || []).join(", ")}`;
             contentNotice.classList.add("active");
           }
           goStep("pages");
         } catch (error) {
-          contentNotice.textContent = `整理失敗：${error.message}`;
+          contentNotice.textContent = `提煉失敗：${error.message}`;
           contentNotice.classList.add("active");
         } finally {
           generateOutline.disabled = false;
-          generateOutline.textContent = "生成每頁內容";
+          generateOutline.textContent = "提煉內容結構";
         }
       });
 
@@ -1035,18 +982,24 @@
         renderPreview();
       });
 
-      pageLeadInput.addEventListener("input", () => {
+      pageClaimInput.addEventListener("input", () => {
         const page = currentPage();
         if (!page) return;
-        page.lead = pageLeadInput.value;
+        page.claim = pageClaimInput.value;
         renderPreview();
       });
 
-      pageTagsInput.addEventListener("input", () => {
+      imageBriefInput.addEventListener("input", () => {
         const page = currentPage();
         if (!page) return;
-        page.tags = parseTags(pageTagsInput.value);
-        renderPreview();
+        page.imageBrief = imageBriefInput.value;
+      });
+
+      addBlock.addEventListener("click", () => {
+        const page = currentPage();
+        if (!page) return;
+        page.blocks.push({ label: "新欄位", value: "" });
+        renderAll();
       });
 
       movePageUp.addEventListener("click", () => {
@@ -1084,12 +1037,10 @@
             });
             if (!data.page) throw new Error(data.error || "No page returned");
             page.title = data.page.title || page.title;
-            page.lead = data.page.lead || page.lead;
-            page.tags = Array.isArray(data.page.tags) && data.page.tags.length ? data.page.tags.slice(0, 4) : page.tags;
-            if (!data.ok) {
-              editNotice.textContent = `AI key 不完整，已使用本機備援：${(data.missingKeys || []).join(", ")}`;
-              editNotice.classList.add("active");
-            }
+            page.claim = data.page.claim || page.claim;
+            page.blocks = normalizeBlocks(data.page.blocks?.length ? data.page.blocks : page.blocks);
+            page.layoutHint = data.page.layoutHint || page.layoutHint;
+            page.imageBrief = data.page.imageBrief || page.imageBrief;
             renderAll();
           } catch (error) {
             editNotice.textContent = `AI 輔助失敗：${error.message}`;
@@ -1105,7 +1056,7 @@
         const card = event.target.closest(".layout-card");
         const page = currentPage();
         if (!card || !page) return;
-        page.layout = card.dataset.layout;
+        page.layoutHint = card.dataset.layout;
         renderAll();
       });
 
@@ -1118,9 +1069,9 @@
         try {
           const data = await postJson("/api/generate-image", {
             title: page.title,
-            lead: page.lead,
-            layout: page.layout,
-            purpose: imagePurposeInput.value,
+            lead: page.claim,
+            layout: page.layoutHint,
+            purpose: page.imageBrief || "text-free editorial visual",
             design: "editorial"
           });
           if (!data.ok || !data.imageDataUrl) throw new Error(data.error || "Image generation failed");
@@ -1133,14 +1084,6 @@
           generatePageImage.disabled = false;
           generatePageImage.textContent = "產生本頁配圖";
         }
-      });
-
-      referenceImage.addEventListener("change", () => {
-        const file = referenceImage.files && referenceImage.files[0];
-        if (!file) return;
-        state.referenceImage = true;
-        uploadTitle.textContent = file.name;
-        uploadText.textContent = "已加入參考圖。產圖仍會要求不出現任何文字。";
       });
 
       goStep("content");

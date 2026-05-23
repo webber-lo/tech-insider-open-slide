@@ -1,4 +1,4 @@
-import { buildFallbackPages, callAnthropic, callGemini, callOpenAI, fallbackOutline, json, missingKeys, readJsonBody } from "./_lib/ai.mjs";
+import { callAnthropic, callGemini, callOpenAI, json, missingKeys, readJsonBody } from "./_lib/ai.mjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { ok: false, error: "Use POST" });
@@ -6,27 +6,42 @@ export default async function handler(req, res) {
   const { article = "", audience = "", pageCount = "", design = "" } = await readJsonBody(req);
   const targetPages = parsePageTarget(pageCount, article);
   const prompt = [
-    "你是 TECH INSIDER 的簡報內容規劃顧問。",
-    "請把使用者提供的長文整理成適合簡報的逐頁內容。",
-    `請產生剛好 ${targetPages} 頁，不要少於或多於這個頁數。`,
-    "這一步只處理內容，不要替頁面選 layout，也不要描述圖片。",
-    "每頁需要有 page, title, lead, tags。",
-    "tags 是頁面底部可編輯的資訊標籤，請依照該頁內容生成 3 到 4 個短標籤，不要使用固定模板。",
-    "請只輸出 JSON，格式為 {\"pages\":[...]}，不要輸出 Markdown 或 HTML。",
-    "不要產生圖片提示詞，不要產生 HTML。",
-    `對象：${audience}`,
-    `頁數控制：${pageCount || "依文章指定"}，實際目標：${targetPages} 頁`,
-    `設計方向只作為語氣參考，不要輸出版型：${design}`,
-    `文章：${article}`
+    "You are a structure-first presentation planner.",
+    "Read the source text before deciding any slide layout.",
+    "Do not force a fixed framework such as tags, main channel, update frequency, or any topic-specific fields.",
+    "First extract the meaningful structure that already exists in the text, then preserve it.",
+    `Create exactly ${targetPages} pages.`,
+    "Each page must use this JSON shape:",
+    JSON.stringify({
+      pages: [
+        {
+          page: 1,
+          title: "page title",
+          claim: "main meaning of this page",
+          blocks: [{ label: "field name from the source text", value: "preserved useful detail" }],
+          layoutHint: "Narrative | Comparison | Matrix | Timeline | Process | Profile | List | Relationship | Quote | Cover",
+          imageBrief: "text-free visual direction"
+        }
+      ]
+    }),
+    "Rules:",
+    "- blocks are not decorative captions. They are the important content structure from the source.",
+    "- Use source-specific block labels. For a book, labels may be chapter point/case/concept. For astrology, labels may be behavior clue/psychological function/limit. For a program plan, labels may be whatever appears in the source.",
+    "- Keep concrete details such as frequency, duration, structure, source, names, numbers, or constraints when they matter.",
+    "- Do not invent meaningless generic blocks.",
+    "- Do not output Markdown, HTML, or commentary. Output JSON only.",
+    `Audience: ${audience}`,
+    `Page count control: ${pageCount || "auto from source"}, target pages: ${targetPages}`,
+    `Design context: ${design}`,
+    `Source text:\n${article}`
   ].join("\n\n");
 
   const [gemini, claude, openai] = await Promise.all([
-    callGemini(`請規劃內容結構並輸出 JSON：\n${prompt}`),
-    callAnthropic(`請整理簡報逐頁主張並輸出 JSON：\n${prompt}`),
-    callOpenAI(`請做最後內容整合並輸出 JSON：\n${prompt}`)
+    callGemini(`Extract meaning blocks and return JSON only:\n${prompt}`),
+    callAnthropic(`Plan pages from source structure and return JSON only:\n${prompt}`),
+    callOpenAI(`Finalize the structured pages as JSON only:\n${prompt}`)
   ]);
 
-  const fallback = fallbackOutline(article);
   const successful = [gemini, claude, openai].filter((item) => item.ok && item.text);
   const best = successful.at(-1)?.text || "";
   const pages = fitPageCount(extractPages(best), targetPages) || buildFallbackPages(article, targetPages);
@@ -36,9 +51,8 @@ export default async function handler(req, res) {
     missingKeys: missingKeys(["GEMINI_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"]),
     providers: { gemini, claude, openai },
     outline: {
-      title: pages[0]?.title || fallback.title,
-      lead: pages[0]?.lead || fallback.lead,
-      captions: pages[0]?.tags?.slice(0, 4) || fallback.captions,
+      title: pages[0]?.title || "Structured deck",
+      claim: pages[0]?.claim || "",
       pages
     },
     rawText: best
@@ -62,66 +76,91 @@ function clampPageCount(value) {
   return Math.max(1, Math.min(24, value));
 }
 
-function fitPageCount(pages, target) {
-  if (!Array.isArray(pages) || !pages.length) return null;
-  const fitted = pages.slice(0, target);
-  while (fitted.length < target) {
-    const previous = fitted.at(-1) || pages.at(-1);
-    fitted.push({
-      page: fitted.length + 1,
-      layout: "",
-      title: `${previous.title}：延伸重點`.slice(0, 44),
-      lead: previous.lead || "補充這個主題的下一個關鍵角度。",
-      tags: previous.tags?.length ? previous.tags.slice(0, 4) : ["延伸", "補充", "重點"]
-    });
-  }
-  return fitted.map((page, index) => ({ ...page, page: index + 1, layout: page.layout || "" }));
-}
-
 function extractPages(text) {
   if (!text) return null;
   const jsonText = text.match(/```json\s*([\s\S]*?)```/i)?.[1] || text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/i)?.[1];
-  if (jsonText) {
-    try {
-      const parsed = JSON.parse(jsonText);
-      const pages = Array.isArray(parsed) ? parsed : parsed.pages || parsed.slides;
-      const normalized = normalizePages(pages);
-      if (normalized.length) return normalized;
-    } catch {
-      // Fall back to text extraction below.
-    }
+  if (!jsonText) return null;
+  try {
+    const parsed = JSON.parse(jsonText);
+    const pages = Array.isArray(parsed) ? parsed : parsed.pages || parsed.slides;
+    const normalized = normalizePages(pages);
+    return normalized.length ? normalized : null;
+  } catch {
+    return null;
   }
-
-  const blocks = text.split(/\n(?=\s*(?:第\s*\d+\s*頁|Slide\s*\d+|Page\s*\d+))/i);
-  const pages = blocks
-    .map((block, index) => {
-      const lines = block.split(/\r?\n/).map((line) => line.replace(/^[#*\-\d.\s:：]+/, "").trim()).filter(Boolean);
-      if (!lines.length) return null;
-      return {
-        page: index + 1,
-        layout: "",
-        title: lines[0].slice(0, 44),
-        lead: lines.slice(1).join(" ").slice(0, 180) || lines[0],
-        tags: inferTags(lines.join(" "))
-      };
-    })
-    .filter(Boolean);
-  return pages.length >= 2 ? pages : null;
 }
 
 function normalizePages(pages) {
   if (!Array.isArray(pages)) return [];
   return pages.map((page, index) => ({
-    page: Number(page.page || index + 1),
-    layout: String(page.layout || ""),
-    title: String(page.title || page.slideTitle || `第 ${index + 1} 頁`).slice(0, 44),
-    lead: String(page.lead || page.summary || page.body || "").slice(0, 180),
-    tags: Array.isArray(page.tags) && page.tags.length ? page.tags.slice(0, 4).map(String) : inferTags(`${page.title || ""} ${page.lead || ""}`)
+    page: index + 1,
+    title: clean(page.title || page.slideTitle || `第 ${index + 1} 頁`, 64),
+    claim: clean(page.claim || page.lead || page.summary || page.body || "", 260),
+    blocks: normalizeBlocks(page.blocks || page.details || page.items || page.sections),
+    layoutHint: clean(page.layoutHint || page.layout || "", 40),
+    imageBrief: clean(page.imageBrief || page.visualBrief || "", 160)
   })).filter((page) => page.title);
 }
 
-function inferTags(text) {
-  const source = String(text || "");
-  const candidates = ["趨勢", "問題", "角色", "影響", "策略", "風險", "機會", "下一步"];
-  return candidates.filter((tag) => source.includes(tag)).slice(0, 4).concat(candidates).slice(0, 4);
+function normalizeBlocks(blocks) {
+  if (!Array.isArray(blocks)) return [];
+  return blocks
+    .map((block) => {
+      if (typeof block === "string") return { label: "重點", value: clean(block, 220) };
+      return {
+        label: clean(block.label || block.name || block.key || "重點", 32),
+        value: clean(block.value || block.text || block.content || "", 260)
+      };
+    })
+    .filter((block) => block.label && block.value)
+    .slice(0, 8);
+}
+
+function fitPageCount(pages, target) {
+  if (!Array.isArray(pages) || !pages.length) return null;
+  const fitted = pages.slice(0, target);
+  while (fitted.length < target) {
+    fitted.push({
+      page: fitted.length + 1,
+      title: `補充頁 ${fitted.length + 1}`,
+      claim: "這一頁需要由原始資料補足更明確的內容。",
+      blocks: [],
+      layoutHint: "List",
+      imageBrief: "abstract editorial visual, no text"
+    });
+  }
+  return fitted.map((page, index) => ({ ...page, page: index + 1 }));
+}
+
+function buildFallbackPages(article, target) {
+  const chunks = splitSource(article, target);
+  return chunks.map((chunk, index) => ({
+    page: index + 1,
+    title: index === 0 ? "內容結構整理" : `內容重點 ${index + 1}`,
+    claim: clean(chunk, 180),
+    blocks: extractSimpleBlocks(chunk),
+    layoutHint: index === 0 ? "Cover" : "List",
+    imageBrief: "text-free editorial visual"
+  }));
+}
+
+function splitSource(article, target) {
+  const text = String(article || "").replace(/\s+/g, " ").trim() || "請輸入內容。";
+  const size = Math.max(80, Math.ceil(text.length / target));
+  const chunks = [];
+  for (let i = 0; i < target; i += 1) chunks.push(text.slice(i * size, (i + 1) * size));
+  return chunks;
+}
+
+function extractSimpleBlocks(text) {
+  return String(text || "")
+    .split(/[。；;\n]/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((value, index) => ({ label: `重點 ${index + 1}`, value: clean(value, 180) }));
+}
+
+function clean(value, max) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, max);
 }
